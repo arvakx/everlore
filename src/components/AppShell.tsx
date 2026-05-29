@@ -167,6 +167,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </nav>
       </main>
+      <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </div>
   );
 }
