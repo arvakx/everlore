@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          agent_overrides: Json
+          created_at: string
+          email: string
+          font_size: number
+          id: string
+          immersion_theme: string
+          name: string
+          plan: string
+          proactive_nudges: boolean
+          specialist: string
+          theme: string
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          agent_overrides?: Json
+          created_at?: string
+          email?: string
+          font_size?: number
+          id: string
+          immersion_theme?: string
+          name?: string
+          plan?: string
+          proactive_nudges?: boolean
+          specialist?: string
+          theme?: string
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          agent_overrides?: Json
+          created_at?: string
+          email?: string
+          font_size?: number
+          id?: string
+          immersion_theme?: string
+          name?: string
+          plan?: string
+          proactive_nudges?: boolean
+          specialist?: string
+          theme?: string
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
