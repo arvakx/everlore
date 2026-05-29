@@ -16,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const [mounted, setMounted] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
