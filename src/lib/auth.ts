@@ -118,6 +118,7 @@ export async function signInWithEmail(email: string, password: string) {
 export async function signOut() {
   await supabase.auth.signOut();
   setUser(null);
+  setStoriesLocal([]);
 }
 
 export function pushPatchAsync(patch: Partial<User>) {
