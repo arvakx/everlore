@@ -18,7 +18,14 @@ type FeatureId =
   | "rpg" | "reader" | "blocks" | "universe" | "publish"
   | "anti" | "canon" | "daily" | "style" | "coauthor";
 
+const AVAILABLE: FeatureId[] = ["blocks", "publish", "anti", "canon"];
+const isAvailable = (id: FeatureId) => AVAILABLE.includes(id);
+
 const FEATURES: { id: FeatureId; label: string; icon: typeof Wand2; tagline: string }[] = [
+  { id: "blocks",   label: "Bloques narrativos",      icon: Blocks,       tagline: "Escenas, diálogos, flashbacks" },
+  { id: "publish",  label: "Publicación profesional", icon: BookOpen,     tagline: "Portada, sinopsis, maquetado" },
+  { id: "anti",     label: "Anti-perfeccionismo",     icon: Feather,      tagline: "Modo borrador libre" },
+  { id: "canon",    label: "Eventos canon",           icon: Bookmark,     tagline: "Línea de tiempo de momentos clave" },
   { id: "chapter",  label: "Capítulos vivos",         icon: Wand2,        tagline: "Atmósfera adaptativa por tono" },
   { id: "decisions",label: "Decisiones narrativas",   icon: GitBranch,    tagline: "Bifurcaciones estilo RPG" },
   { id: "memory",   label: "Memoria emocional",       icon: Brain,        tagline: "Perfil creativo del escritor" },
@@ -26,11 +33,7 @@ const FEATURES: { id: FeatureId; label: string; icon: typeof Wand2; tagline: str
   { id: "dual",     label: "Editor dual",             icon: Scissors,     tagline: "Duro o creativo, tú eliges" },
   { id: "rpg",      label: "Progresión RPG",          icon: Trophy,       tagline: "XP, niveles, logros" },
   { id: "reader",   label: "Simulador de lector",     icon: Users,        tagline: "Casual, fan, crítico, editor" },
-  { id: "blocks",   label: "Bloques narrativos",      icon: Blocks,       tagline: "Escenas, diálogos, flashbacks" },
   { id: "universe", label: "Universo colaborativo",   icon: Globe,        tagline: "Comparte mundos y lore" },
-  { id: "publish",  label: "Publicación profesional", icon: BookOpen,     tagline: "Portada, sinopsis, maquetado" },
-  { id: "anti",     label: "Anti-perfeccionismo",     icon: Feather,      tagline: "Modo borrador libre" },
-  { id: "canon",    label: "Eventos canon",           icon: Bookmark,     tagline: "Línea de tiempo de momentos clave" },
   { id: "daily",    label: "Inspiración diaria",      icon: Lightbulb,    tagline: "Un prompt al día" },
   { id: "style",    label: "Transformación de estilo", icon: Palette,     tagline: "Épico, poético, oscuro…" },
   { id: "coauthor", label: "Co-autor en vivo",        icon: PenLine,      tagline: "Sugerencias línea a línea" },
