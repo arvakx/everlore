@@ -271,11 +271,11 @@ function Workspace() {
                 )}
               </div>
 
-              <button onClick={() => setShowHealth((v) => !v)}
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs transition-all ${
-                  showHealth ? "bg-accent text-mint border border-emerald" : "border border-hairline bg-paper-elevated text-ink hover:border-emerald"
-                }`}>
+              <button disabled
+                className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs border border-hairline bg-paper-elevated text-ink opacity-50 cursor-not-allowed"
+                title="Próximamente">
                 <Activity className="h-3.5 w-3.5" /> Pulso
+                <span className="ml-1 text-[9px] uppercase tracking-widest text-mint/70">Pronto</span>
               </button>
 
               <button onClick={() => setLabOpen(true)} className={toolBtnCls} title="Laboratorio narrativo">
