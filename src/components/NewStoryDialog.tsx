@@ -15,6 +15,7 @@ export function NewStoryDialog({ open, onClose, onCreated }: Props) {
   const [logline, setLogline] = useState("");
   const [groupId, setGroupId] = useState(AURA_GROUPS[0].id);
   const [auraId, setAuraId] = useState<string>(AURA_GROUPS[0].auras[0].id);
+  const [busy, setBusy] = useState(false);
 
   const selected: Aura = useMemo(
     () => ALL_AURAS.find((a) => a.id === auraId) ?? AURA_GROUPS[0].auras[0],
@@ -24,10 +25,20 @@ export function NewStoryDialog({ open, onClose, onCreated }: Props) {
 
   if (!open) return null;
 
-  function create() {
-    const s = createStory({ title, logline, coverColor: selected.color });
-    setTitle(""); setLogline("");
-    onCreated(s.id);
+  async function create() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await createStory({ title, logline, coverColor: selected.color });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      setTitle(""); setLogline("");
+      onCreated(res.story.id);
+    } finally {
+      setBusy(false);
+    }
   }
 
   function suggestAura() {
