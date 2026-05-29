@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { createStory } from "@/lib/store";
 import { AURA_GROUPS, ALL_AURAS, type Aura } from "@/lib/auras";
-import { X, Sparkles, Wand2 } from "lucide-react";
+import { X, Sparkles, Wand2, Loader2 } from "lucide-react";
 
 interface Props {
   open: boolean;
