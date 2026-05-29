@@ -38,6 +38,8 @@ function Workspace() {
   const [showHealth, setShowHealth] = useState(false);
   const [immersionMenu, setImmersionMenu] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "saving">("saved");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
   useEffect(() => {
