@@ -195,7 +195,7 @@ function Workspace() {
       <div className="flex flex-1 flex-col min-w-0 relative z-10">
         {/* Top bar */}
         {!focus && (
-          <div className="flex items-center gap-1.5 sm:gap-2 border-b border-hairline px-3 sm:px-5 py-2.5 sm:py-3 glass safe-top">
+          <div className="flex items-center gap-1.5 sm:gap-2 border-b border-hairline px-3 sm:px-4 py-3 sm:py-[14px] glass safe-top">
             <button
               onClick={() => router.navigate({ to: "/" })}
               className="rounded-md p-1.5 text-ink-muted hover:bg-accent hover:text-mint shrink-0"
@@ -214,8 +214,9 @@ function Workspace() {
 
             <input
               value={story.title}
+              title={story.title}
               onChange={(e) => updateTitle(e.target.value)}
-              className="bg-transparent font-serif text-sm sm:text-base text-ink outline-none px-1.5 sm:px-2 py-1 rounded hover:bg-accent/40 focus:bg-accent/60 min-w-0 flex-1 sm:flex-none sm:max-w-[280px]"
+              className="bg-transparent font-serif text-sm sm:text-base text-ink outline-none px-1.5 sm:px-2 py-1 rounded hover:bg-accent/40 focus:bg-accent/60 min-w-0 flex-1 sm:flex-none sm:max-w-[280px] truncate"
             />
             <div className="hidden sm:block flex-1" />
 
