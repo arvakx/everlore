@@ -113,24 +113,24 @@
   --ring: var(--emerald);
 }
 
-/* "Light" stays available but de-prioritized — a warm parchment with forest ink */
-.light {
-  --paper: oklch(0.965 0.012 110);
-  --paper-elevated: oklch(0.985 0.008 110);
+/* ===== Tema "Día sereno" — pergamino blanco luminoso ===== */
+.theme-dia {
+  --paper: oklch(0.985 0.005 110);
+  --paper-elevated: oklch(0.998 0.003 110);
   --ink: oklch(0.22 0.03 160);
   --ink-muted: oklch(0.5 0.02 155);
-  --emerald: oklch(0.5 0.14 152);
-  --forest: oklch(0.32 0.09 158);
-  --mint: oklch(0.7 0.12 165);
-  --neon: oklch(0.7 0.22 142);
+  --emerald: oklch(0.55 0.14 152);
+  --forest: oklch(0.35 0.09 158);
+  --mint: oklch(0.62 0.13 165);
+  --neon: oklch(0.68 0.2 142);
   --sage: oklch(0.55 0.07 150);
-  --ember: oklch(0.5 0.14 152);
-  --ember-hover: oklch(0.42 0.15 152);
+  --ember: oklch(0.55 0.14 152);
+  --ember-hover: oklch(0.48 0.15 152);
   --cyan-accent: oklch(0.55 0.12 200);
-  --assistant-surface: oklch(0.93 0.022 150);
-  --assistant-accent: oklch(0.48 0.1 175);
+  --assistant-surface: oklch(0.96 0.012 150);
+  --assistant-accent: oklch(0.5 0.1 175);
   --success: oklch(0.55 0.14 145);
-  --hairline: oklch(0.88 0.018 150);
+  --hairline: oklch(0.86 0.012 150);
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -141,11 +141,11 @@
   --primary: var(--ember);
   --primary-foreground: oklch(0.99 0.005 80);
   --primary-hover: var(--ember-hover);
-  --secondary: oklch(0.93 0.012 80);
+  --secondary: oklch(0.94 0.008 150);
   --secondary-foreground: var(--ink);
-  --muted: oklch(0.93 0.012 80);
+  --muted: oklch(0.94 0.008 150);
   --muted-foreground: var(--ink-muted);
-  --accent: oklch(0.92 0.02 150);
+  --accent: oklch(0.93 0.018 150);
   --accent-foreground: var(--ink);
   --destructive: oklch(0.55 0.18 25);
   --destructive-foreground: oklch(0.99 0.005 80);
@@ -153,6 +153,51 @@
   --input: var(--hairline);
   --ring: var(--emerald);
 }
+
+/* ===== Tema "Alba dorada" — blanco cálido con destellos naranja ===== */
+.theme-alba {
+  --paper: oklch(0.965 0.025 75);
+  --paper-elevated: oklch(0.985 0.02 70);
+  --ink: oklch(0.26 0.04 35);
+  --ink-muted: oklch(0.52 0.05 45);
+  --emerald: oklch(0.6 0.16 55);            /* ámbar como acento principal */
+  --forest: oklch(0.42 0.12 45);
+  --mint: oklch(0.72 0.16 60);
+  --neon: oklch(0.78 0.2 55);
+  --sage: oklch(0.6 0.08 70);
+  --ember: oklch(0.65 0.18 55);
+  --ember-hover: oklch(0.58 0.2 50);
+  --cyan-accent: oklch(0.7 0.12 30);
+  --assistant-surface: oklch(0.95 0.04 70);
+  --assistant-accent: oklch(0.62 0.16 50);
+  --success: oklch(0.6 0.16 110);
+  --hairline: oklch(0.84 0.04 65);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper-elevated);
+  --card-foreground: var(--ink);
+  --popover: var(--paper-elevated);
+  --popover-foreground: var(--ink);
+  --primary: var(--ember);
+  --primary-foreground: oklch(0.99 0.005 80);
+  --primary-hover: var(--ember-hover);
+  --secondary: oklch(0.94 0.03 70);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.94 0.03 70);
+  --muted-foreground: var(--ink-muted);
+  --accent: oklch(0.93 0.05 65);
+  --accent-foreground: var(--ink);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.99 0.005 80);
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --ring: var(--ember);
+}
+
+/* Alias retro-compatibles para mantener selectores existentes (.light .immersion-*) */
+.theme-dia, .theme-alba { }
+.light { }
 
 @layer base {
   * { border-color: var(--color-border); }
