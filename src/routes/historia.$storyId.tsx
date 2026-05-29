@@ -240,8 +240,9 @@ function Workspace() {
                 current={activeScene.scene.content}
                 onApply={(html) => applyContent(html, { skipHistory: true })}
               />
-              <button onClick={() => setHistoryOpen(true)} className={toolBtnCls} title="Historial">
+              <button disabled className={`${toolBtnCls} opacity-50 cursor-not-allowed`} title="Próximamente">
                 <History className="h-3.5 w-3.5" /> Historial
+                <span className="ml-1 text-[9px] uppercase tracking-widest text-mint/70">Pronto</span>
               </button>
 
               {/* Immersion */}
