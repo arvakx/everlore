@@ -31,11 +31,11 @@ export function AudioPlayer({ variant = "mini", open, onClose }: Props) {
   if (variant === "mini") {
     return (
       <>
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-          <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full glass-strong border border-hairline px-2 py-1.5 shadow-paper">
+        <div className="fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none safe-bottom px-3 w-full sm:w-auto flex justify-center">
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 sm:gap-2 rounded-full glass-strong border border-hairline px-1.5 sm:px-2 py-1 sm:py-1.5 shadow-paper max-w-full">
             <button
               onClick={() => togglePlay()}
-              className="relative inline-flex h-9 w-9 items-center justify-center rounded-full gradient-emerald text-primary-foreground hover:shadow-glow transition active:scale-95"
+              className="relative inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full gradient-emerald text-primary-foreground hover:shadow-glow transition active:scale-95 shrink-0"
               aria-label={state.playing ? "Pausar" : "Reproducir"}
             >
               {state.playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 translate-x-px" />}
@@ -46,21 +46,21 @@ export function AudioPlayer({ variant = "mini", open, onClose }: Props) {
             </button>
             <button
               onClick={() => setPanelOpen(true)}
-              className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-accent transition text-left max-w-[220px]"
+              className="flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2 py-1 rounded-full hover:bg-accent transition text-left min-w-0 flex-1 sm:flex-none sm:max-w-[220px]"
             >
               <div className="relative shrink-0">
                 <Disc3 className={`h-4 w-4 text-mint ${state.playing ? "animate-spin" : ""}`} style={{ animationDuration: "8s" }} />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-xs text-ink truncate leading-tight">
                   {currentCat?.name ?? "Atmósfera apagada"}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-ink-muted leading-tight">
+                <div className="text-[9px] uppercase tracking-widest text-ink-muted leading-tight truncate hidden sm:block">
                   {activeLayerCount > 0 ? `${activeLayerCount} capa${activeLayerCount > 1 ? "s" : ""}` : "Elige una atmósfera"}
                 </div>
               </div>
             </button>
-            <div className="flex items-center gap-1.5 pr-2 pl-1 border-l border-hairline/70">
+            <div className="hidden sm:flex items-center gap-1.5 pr-2 pl-1 border-l border-hairline/70">
               {state.masterVolume === 0 ? <VolumeX className="h-3.5 w-3.5 text-ink-muted" /> : <Volume2 className="h-3.5 w-3.5 text-ink-muted" />}
               <input
                 type="range" min={0} max={1} step={0.01} value={state.masterVolume}
@@ -69,6 +69,13 @@ export function AudioPlayer({ variant = "mini", open, onClose }: Props) {
                 aria-label="Volumen"
               />
             </div>
+            <button
+              onClick={() => setMasterVolume(state.masterVolume === 0 ? 0.6 : 0)}
+              className="sm:hidden inline-flex items-center justify-center rounded-full p-1.5 text-ink-muted hover:text-mint shrink-0"
+              aria-label="Silenciar"
+            >
+              {state.masterVolume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            </button>
           </div>
         </div>
 
