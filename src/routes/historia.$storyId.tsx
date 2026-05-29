@@ -103,7 +103,10 @@ function Workspace() {
   function setImmersion(id: ImmersionTheme) {
     updateUser({ immersionTheme: id });
     setImmersionMenu(false);
+    const suggested = IMMERSION_TO_CATEGORY[id];
+    if (suggested && audioState.category !== suggested) playCategory(suggested);
   }
+
 
   const immersive = user.immersionTheme !== "ninguno";
 
