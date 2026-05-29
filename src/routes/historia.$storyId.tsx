@@ -1,12 +1,15 @@
 import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye } from "lucide-react";
+import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon } from "lucide-react";
 import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, type ImmersionTheme } from "@/lib/store";
 import { ChaptersPanel } from "@/components/workspace/ChaptersPanel";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
 import { Editor } from "@/components/workspace/Editor";
 import { StoryHealth } from "@/components/StoryHealth";
 import { Particles } from "@/components/Particles";
+import { ExportMenu } from "@/components/ExportMenu";
+import { StorySettingsDialog } from "@/components/StorySettingsDialog";
+
 
 export const Route = createFileRoute("/historia/$storyId")({
   head: () => ({ meta: [{ title: "Escribiendo — Everlore" }] }),
