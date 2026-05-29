@@ -31,6 +31,8 @@ function Dashboard() {
   const router = useRouter();
   const [newOpen, setNewOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [settingsStory, setSettingsStory] = useState<Story | null>(null);
+
 
   if (!user) return <AppShell><div /></AppShell>;
 
