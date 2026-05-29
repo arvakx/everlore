@@ -28,7 +28,7 @@ export function AuthCard({ mode }: Props) {
       plan: existing?.plan ?? "free",
       proactiveNudges: existing?.proactiveNudges ?? true,
       fontSize: existing?.fontSize ?? 19,
-      theme: existing?.theme ?? "dark",
+      theme: existing?.theme ?? "noche",
       xp: existing?.xp ?? 0,
       immersionTheme: existing?.immersionTheme ?? "ninguno",
       specialist: existing?.specialist ?? "lumi",

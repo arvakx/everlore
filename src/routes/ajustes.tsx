@@ -136,17 +136,23 @@ function Settings() {
                   className="w-full accent-emerald"
                 />
               </Field>
-              <Field label="Tema">
-                <div className="flex gap-2">
-                  {(["dark", "light"] as const).map((t) => (
+              <Field label="Tema visual">
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    ["noche", "Noche cinemática", "Verde esmeralda sobre carbón. Por defecto.", "linear-gradient(135deg, oklch(0.18 0.02 165), oklch(0.28 0.04 155))"],
+                    ["alba", "Alba dorada", "Blanco cálido con destellos ámbar y naranja.", "linear-gradient(135deg, oklch(0.97 0.03 75), oklch(0.85 0.12 55))"],
+                    ["dia", "Día sereno", "Pergamino casi blanco, ligero y luminoso.", "linear-gradient(135deg, oklch(0.99 0.005 110), oklch(0.92 0.015 200))"],
+                  ] as const).map(([t, label, desc, bg]) => (
                     <button
                       key={t}
                       onClick={() => updateUser({ theme: t })}
-                      className={`rounded-xl border px-4 py-2 text-sm transition-all ${
-                        user.theme === t ? "border-emerald bg-accent text-mint glow-border" : "border-hairline bg-paper-elevated text-ink-muted hover:text-ink"
+                      className={`group rounded-xl border p-3 text-left transition-all ${
+                        user.theme === t ? "border-emerald glow-border" : "border-hairline hover:border-emerald/60"
                       }`}
                     >
-                      {t === "dark" ? "Noche cinemática" : "Pergamino cálido"}
+                      <div className="h-10 w-full rounded-lg mb-2 border border-hairline" style={{ background: bg }} />
+                      <div className={`text-sm font-medium ${user.theme === t ? "text-mint" : "text-ink"}`}>{label}</div>
+                      <div className="text-[11px] text-ink-muted mt-0.5 leading-snug">{desc}</div>
                     </button>
                   ))}
                 </div>
