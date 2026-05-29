@@ -403,3 +403,23 @@
 }
 .focus-mode .glow-border::before { opacity: 0.4; }
 .focus-mode * { transition-duration: 600ms; }
+
+/* ============ Responsive + mobile helpers ============ */
+.safe-top { padding-top: max(0px, env(safe-area-inset-top)); }
+.safe-bottom { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+
+/* Smooth aura color transitions across the workspace */
+.aura-transition,
+.aura-transition * {
+  transition: background-color 800ms ease, background 800ms ease, box-shadow 800ms ease, border-color 800ms ease, color 400ms ease;
+}
+
+/* Larger tap targets and comfortable inputs on mobile */
+@media (max-width: 767px) {
+  button, a, [role="button"] { min-height: 36px; }
+  input, textarea, select { font-size: 16px; } /* prevent iOS zoom */
+  .prose-manuscript { font-size: 17px; line-height: 1.7; }
+}
+
+/* Hide horizontal scroll artifacts on small screens */
+html, body { overscroll-behavior-y: contain; }
