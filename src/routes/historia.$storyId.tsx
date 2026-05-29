@@ -185,7 +185,7 @@ function Workspace() {
       {showChapters && !focus && (
         <div className="lg:hidden fixed inset-0 z-50 flex animate-fade-up">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowChapters(false)} />
-          <div className="relative w-80 max-w-[85vw] h-[100dvh] safe-top safe-bottom">
+          <div className="relative w-80 max-w-[85vw] h-[100dvh] bg-paper-elevated safe-top safe-bottom">
             <ChaptersPanel story={story} activeSceneId={activeScene.scene.id} onSelectScene={selectScene} />
           </div>
         </div>
