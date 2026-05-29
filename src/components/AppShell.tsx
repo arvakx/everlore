@@ -75,7 +75,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mt-1 text-[10px] text-ink-muted">{user.xp} XP</div>
         </div>
 
-        <div className="rounded-xl border border-hairline bg-paper-elevated/70 p-3.5">
+        <button
+          onClick={() => setUpgradeOpen(true)}
+          className="w-full text-left rounded-xl border border-hairline bg-paper-elevated/70 p-3.5 hover:border-emerald/60 hover:bg-accent/40 transition group"
+          title="Cambiar de plan"
+        >
           <div className="flex items-center gap-1.5">
             <Sparkles className="h-3 w-3 text-mint" />
             <div className="text-[10px] uppercase tracking-widest text-ink-muted">Plan {planLabels[user.plan]}</div>
@@ -83,12 +87,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mt-1 text-sm text-ink">
             {used} de {limit === Infinity ? "∞" : limit} historias
           </div>
-          {user.plan !== "leyenda" && (
-            <Link to="/ajustes" className="mt-2 inline-block text-xs font-medium text-mint hover:text-neon transition">
-              Evolucionar plan →
-            </Link>
-          )}
-        </div>
+          <div className="mt-2 text-xs font-medium text-mint group-hover:text-neon transition">
+            {user.plan === "leyenda" ? "Ver planes →" : "Cambiar plan →"}
+          </div>
+        </button>
 
         <div className="flex items-center gap-2 px-1 pt-1">
           <div className="flex h-9 w-9 items-center justify-center rounded-full gradient-emerald text-primary-foreground text-sm font-medium glow-ring">
