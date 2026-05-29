@@ -108,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0 relative">{children}</main>
+      <main className="flex-1 min-w-0 relative h-screen overflow-y-auto">{children}</main>
     </div>
   );
 }
