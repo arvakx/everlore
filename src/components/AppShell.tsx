@@ -41,8 +41,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-ambient">
-      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-hairline glass px-3 py-5 relative">
+    <div className="flex h-screen w-full bg-ambient overflow-hidden">
+      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-hairline glass px-3 py-5 relative h-screen overflow-hidden">
+
         <div className="px-3 mb-7">
           <Link to="/" className="flex items-center gap-2.5">
             <LumiAvatar size={32} state="idle" />
@@ -107,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0 relative">{children}</main>
+      <main className="flex-1 min-w-0 relative h-screen overflow-y-auto">{children}</main>
     </div>
   );
 }

@@ -1,12 +1,15 @@
 import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye } from "lucide-react";
+import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon } from "lucide-react";
 import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, type ImmersionTheme } from "@/lib/store";
 import { ChaptersPanel } from "@/components/workspace/ChaptersPanel";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
 import { Editor } from "@/components/workspace/Editor";
 import { StoryHealth } from "@/components/StoryHealth";
 import { Particles } from "@/components/Particles";
+import { ExportMenu } from "@/components/ExportMenu";
+import { StorySettingsDialog } from "@/components/StorySettingsDialog";
+
 
 export const Route = createFileRoute("/historia/$storyId")({
   head: () => ({ meta: [{ title: "Escribiendo — Everlore" }] }),
@@ -35,6 +38,8 @@ function Workspace() {
   const [showHealth, setShowHealth] = useState(false);
   const [immersionMenu, setImmersionMenu] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "saving">("saved");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
   useEffect(() => {
@@ -165,6 +170,17 @@ function Workspace() {
               <Activity className="h-3.5 w-3.5" /> Pulso
             </button>
 
+            <ExportMenu />
+
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald"
+              title="Ajustes de la historia"
+            >
+              <SettingsIcon className="h-3.5 w-3.5" />
+            </button>
+
+
             <button
               onClick={() => setFocus(true)}
               className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald"
@@ -223,7 +239,10 @@ function Workspace() {
           <AssistantPanel story={story} onInsertDraft={insertDraft} />
         </div>
       )}
+
+      <StorySettingsDialog story={settingsOpen ? story : null} onClose={() => setSettingsOpen(false)} onDeleted={() => router.navigate({ to: "/" })} />
     </div>
+
   );
 }
 

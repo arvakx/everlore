@@ -3,14 +3,17 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import {
   useUser, useStories, timeOfDayGreeting, relativeEs, canCreateStory,
-  storyWordCount, computeRank,
+  storyWordCount, computeRank, type Story,
 } from "@/lib/store";
 import { generateReentryLine } from "@/lib/assistant";
 import { NewStoryDialog } from "@/components/NewStoryDialog";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
+import { StorySettingsDialog } from "@/components/StorySettingsDialog";
+import { ExportMenu } from "@/components/ExportMenu";
 import { LumiAvatar } from "@/components/LumiAvatar";
 import { Particles } from "@/components/Particles";
-import { Plus, BookOpen, Sparkles } from "lucide-react";
+import { Plus, BookOpen, Sparkles, Settings as SettingsIcon } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,6 +31,8 @@ function Dashboard() {
   const router = useRouter();
   const [newOpen, setNewOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [settingsStory, setSettingsStory] = useState<Story | null>(null);
+
 
   if (!user) return <AppShell><div /></AppShell>;
 
@@ -80,42 +85,57 @@ function Dashboard() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {sorted.map((s) => (
-                  <button
+                  <div
                     key={s.id}
-                    onClick={() => router.navigate({ to: "/historia/$storyId", params: { storyId: s.id } })}
-                    className="group text-left rounded-2xl glass p-5 transition-all hover:glow-ring hover:-translate-y-1 hover:border-emerald/50"
+                    className="group relative rounded-2xl glass p-5 transition-all hover:glow-ring hover:-translate-y-1 hover:border-emerald/50"
                   >
-                    <div className="flex gap-4">
-                      <div
-                        className="h-24 w-16 rounded-md shrink-0 relative overflow-hidden"
-                        style={{
-                          background: `linear-gradient(160deg, ${s.coverColor}, ${s.coverColor}80)`,
-                          boxShadow: `0 0 24px ${s.coverColor}55`,
-                        }}
+                    <button
+                      onClick={() => router.navigate({ to: "/historia/$storyId", params: { storyId: s.id } })}
+                      className="text-left w-full"
+                    >
+                      <div className="flex gap-4">
+                        <div
+                          className="h-24 w-16 rounded-md shrink-0 relative overflow-hidden"
+                          style={{
+                            background: `linear-gradient(160deg, ${s.coverColor}, ${s.coverColor}80)`,
+                            boxShadow: `0 0 24px ${s.coverColor}55`,
+                          }}
+                        >
+                          <div className="absolute inset-0 opacity-30" style={{
+                            background: "linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.4))",
+                          }} />
+                        </div>
+                        <div className="min-w-0 flex-1 pr-14">
+                          <div className="font-serif text-lg text-ink truncate group-hover:text-mint transition-colors">
+                            {s.title}
+                          </div>
+                          {s.logline && (
+                            <div className="mt-1 text-xs text-ink-muted line-clamp-2 italic">{s.logline}</div>
+                          )}
+                          <div className="mt-2 flex items-center gap-2 text-[11px] text-ink-muted">
+                            <span>{storyWordCount(s).toLocaleString("es")} palabras</span>
+                            <span className="h-1 w-1 rounded-full bg-hairline" />
+                            <span>{s.chapters.length} cap.</span>
+                          </div>
+                          <div className="mt-0.5 text-[10px] text-ink-muted/80">
+                            Editado {relativeEs(s.updatedAt)}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                    <div className="absolute top-3 right-3 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition">
+                      <ExportMenu variant="icon" />
+                      <button
+                        onClick={() => setSettingsStory(s)}
+                        className="rounded-md p-1.5 text-ink-muted hover:bg-accent hover:text-mint transition"
+                        title="Ajustes de la historia"
                       >
-                        <div className="absolute inset-0 opacity-30" style={{
-                          background: "linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.4))",
-                        }} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-serif text-lg text-ink truncate group-hover:text-mint transition-colors">
-                          {s.title}
-                        </div>
-                        {s.logline && (
-                          <div className="mt-1 text-xs text-ink-muted line-clamp-2 italic">{s.logline}</div>
-                        )}
-                        <div className="mt-2 flex items-center gap-2 text-[11px] text-ink-muted">
-                          <span>{storyWordCount(s).toLocaleString("es")} palabras</span>
-                          <span className="h-1 w-1 rounded-full bg-hairline" />
-                          <span>{s.chapters.length} cap.</span>
-                        </div>
-                        <div className="mt-0.5 text-[10px] text-ink-muted/80">
-                          Editado {relativeEs(s.updatedAt)}
-                        </div>
-                      </div>
+                        <SettingsIcon className="h-4 w-4" />
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 ))}
+
 
                 <button
                   onClick={tryCreate}
@@ -136,6 +156,8 @@ function Dashboard() {
         onCreated={(id) => { setNewOpen(false); router.navigate({ to: "/historia/$storyId", params: { storyId: id } }); }}
       />
       <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+      <StorySettingsDialog story={settingsStory} onClose={() => setSettingsStory(null)} />
+
     </AppShell>
   );
 }
