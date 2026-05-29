@@ -239,7 +239,10 @@ function Workspace() {
           <AssistantPanel story={story} onInsertDraft={insertDraft} />
         </div>
       )}
+
+      <StorySettingsDialog story={settingsOpen ? story : null} onClose={() => setSettingsOpen(false)} onDeleted={() => router.navigate({ to: "/" })} />
     </div>
+
   );
 }
 
