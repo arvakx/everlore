@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   X, FlaskConical, Wand2, GitBranch, Brain, Film, Scissors, Trophy, Users,
-  Blocks, Globe, BookOpen, Feather, Bookmark, Lightbulb, Palette, PenLine, Sparkles,
+  Blocks, Globe, BookOpen, Feather, Bookmark, Lightbulb, Palette, PenLine, Sparkles, Lock,
 } from "lucide-react";
 import type { Story } from "@/lib/store";
 
