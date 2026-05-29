@@ -27,7 +27,7 @@ export function AssistantPanel({ story, onInsertDraft }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const specialist = SPECIALISTS.find((s) => s.id === (user?.specialist ?? "lumi"))!;
+  const specialist = resolveSpecialist((user?.specialist ?? "lumi"), user);
   const nudges = user?.proactiveNudges
     ? generateNudges(story).filter((n) => !story.nudges.find((x) => x.text === n && x.dismissed))
     : [];
