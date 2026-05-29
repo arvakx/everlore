@@ -403,7 +403,7 @@ function Workspace() {
       {showAssistant && !focus && (
         <div className="xl:hidden fixed inset-0 z-50 flex justify-end animate-fade-up">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAssistant(false)} />
-          <div className="relative w-full sm:w-[420px] max-w-full h-[100dvh] safe-top safe-bottom">
+          <div className="relative w-full sm:w-[420px] max-w-full h-[100dvh] bg-paper-elevated border-l border-hairline safe-top safe-bottom">
             <button
               onClick={() => setShowAssistant(false)}
               className="absolute top-3 right-3 z-10 rounded-md p-1.5 glass border border-hairline text-ink-muted hover:text-ink"
