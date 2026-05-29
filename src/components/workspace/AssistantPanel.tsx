@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Send, X, Trash2, Copy, RefreshCw, ArrowDownToLine, ChevronDown, MessagesSquare, User as UserIcon } from "lucide-react";
 import type { Story, AiSpecialist } from "@/lib/store";
-import { updateStory, newId, useUser, updateUser, SPECIALISTS } from "@/lib/store";
+import { updateStory, newId, useUser, updateUser, SPECIALISTS, resolveSpecialist } from "@/lib/store";
 import { generateChatResponse, generateDraft, generateNudges } from "@/lib/assistant";
 import { LumiAvatar } from "@/components/LumiAvatar";
 
