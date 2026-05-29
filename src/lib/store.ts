@@ -125,6 +125,8 @@ export function setUser(u: User | null) {
 }
 export function updateUser(patch: Partial<User>) {
   const u = getUser(); if (!u) return; setUser({ ...u, ...patch });
+  // Fire-and-forget DB sync (no-op when not signed in).
+  void import("@/lib/auth").then((m) => m.pushPatchAsync(patch));
 }
 
 export function useUser() {
