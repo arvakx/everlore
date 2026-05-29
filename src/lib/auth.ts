@@ -43,15 +43,32 @@ export async function hydrateUserFromSession() {
 }
 
 let initialized = false;
+let authReady = false;
+const readyListeners = new Set<() => void>();
+export function isAuthReady() { return authReady; }
+export function subscribeAuthReady(cb: () => void) {
+  readyListeners.add(cb);
+  return () => { readyListeners.delete(cb); };
+}
+function markReady() {
+  authReady = true;
+  readyListeners.forEach((l) => l());
+}
 export function initAuth() {
   if (initialized || typeof window === "undefined") return;
   initialized = true;
-  void hydrateUserFromSession();
+  void hydrateUserFromSession().finally(markReady);
   supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) { setUser(null); return; }
-    setTimeout(() => { void hydrateUserFromSession(); }, 0);
+    if (!session) { setUser(null); markReady(); return; }
+    setTimeout(() => { void hydrateUserFromSession().finally(markReady); }, 0);
   });
 }
+
+import { useSyncExternalStore } from "react";
+export function useAuthReady() {
+  return useSyncExternalStore(subscribeAuthReady, isAuthReady, () => false);
+}
+
 
 export async function persistUserPatch(patch: Partial<User>) {
   const { data: { session } } = await supabase.auth.getSession();
