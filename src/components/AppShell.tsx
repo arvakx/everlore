@@ -1,13 +1,15 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Home, Settings, LogOut, Sparkles, Trophy, Menu, X, FlaskConical } from "lucide-react";
-import { useUser, useStories, planLimits, planLabels, setUser, useApplyTheme, computeRank } from "@/lib/store";
+import { useUser, useStories, planLimits, planLabels, useApplyTheme, computeRank } from "@/lib/store";
+import { signOut, useAuthReady } from "@/lib/auth";
 import { LumiAvatar } from "@/components/LumiAvatar";
 
 export function AppShell({ children }: { children: ReactNode }) {
   useApplyTheme();
   const router = useRouter();
   const user = useUser();
+  const authReady = useAuthReady();
   const stories = useStories();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -16,10 +18,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
-    if (mounted && !user) router.navigate({ to: "/login" });
-  }, [mounted, user, router]);
+    if (mounted && authReady && !user) router.navigate({ to: "/login" });
+  }, [mounted, authReady, user, router]);
   useEffect(() => { setDrawerOpen(false); }, [pathname]);
-  if (!mounted || !user) return null;
+  if (!mounted || !authReady || !user) return null;
 
   const limit = planLimits[user.plan];
   const used = stories.length;
@@ -95,7 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="truncate text-[10px] text-ink-muted">{user.email || "Escritor de Everlore"}</div>
           </div>
           <button
-            onClick={() => { setUser(null); router.navigate({ to: "/login" }); }}
+            onClick={async () => { await signOut(); router.navigate({ to: "/login" }); }}
             title="Cerrar sesión"
             className="rounded-md p-1.5 text-ink-muted hover:bg-accent hover:text-ink"
           >

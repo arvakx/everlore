@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import { setUser, getUser } from "@/lib/store";
 import { LumiAvatar } from "@/components/LumiAvatar";
 import { Particles } from "@/components/Particles";
+import { signInWithEmail, signUpWithEmail, hydrateUserFromSession } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props { mode: "login" | "signup"; }
 
@@ -12,28 +13,43 @@ export function AuthCard({ mode }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const isSignup = mode === "signup";
 
-  function onSubmit(e: FormEvent) {
+  // If a session already exists, bounce to home.
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!cancelled && data.session) router.navigate({ to: "/" });
+    });
+    return () => { cancelled = true; };
+  }, [router]);
+
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     if (!email || !password || (isSignup && !name)) {
       setError("Completa todos los campos.");
       return;
     }
-    const existing = getUser();
-    setUser({
-      name: isSignup ? name : "Gabriel Calderón",
-      email,
-      plan: existing?.plan ?? "free",
-      proactiveNudges: existing?.proactiveNudges ?? true,
-      fontSize: existing?.fontSize ?? 19,
-      theme: existing?.theme ?? "noche",
-      xp: existing?.xp ?? 0,
-      immersionTheme: existing?.immersionTheme ?? "ninguno",
-      specialist: existing?.specialist ?? "lumi",
-    });
-    router.navigate({ to: "/" });
+    setLoading(true);
+    try {
+      if (isSignup) {
+        await signUpWithEmail(name, email, password);
+      } else {
+        await signInWithEmail(email, password);
+      }
+      await hydrateUserFromSession();
+      router.navigate({ to: "/" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "No se pudo completar la acción.";
+      if (/Invalid login/i.test(msg)) setError("Correo o contraseña incorrectos.");
+      else if (/already registered/i.test(msg)) setError("Este correo ya está registrado. Inicia sesión.");
+      else if (/Password should be at least/i.test(msg)) setError("La contraseña debe tener al menos 6 caracteres.");
+      else setError(msg);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -61,23 +77,24 @@ export function AuthCard({ mode }: Props) {
           <form onSubmit={onSubmit} className="space-y-4">
             {isSignup && (
               <Field label="Nombre">
-                <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Tu nombre" />
+                <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Tu nombre" autoComplete="name" />
               </Field>
             )}
             <Field label="Correo electrónico">
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="tu@correo.com" />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="tu@correo.com" autoComplete="email" />
             </Field>
             <Field label="Contraseña">
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} placeholder="••••••••" />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} placeholder="••••••••" autoComplete={isSignup ? "new-password" : "current-password"} />
             </Field>
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
             <button
               type="submit"
-              className="w-full rounded-xl gradient-emerald px-4 py-3 text-sm font-medium text-primary-foreground transition-all hover:shadow-glow active:scale-[0.98]"
+              disabled={loading}
+              className="w-full rounded-xl gradient-emerald px-4 py-3 text-sm font-medium text-primary-foreground transition-all hover:shadow-glow active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isSignup ? "Encender mi historia" : "Entrar a Everlore"}
+              {loading ? "Un momento…" : isSignup ? "Encender mi historia" : "Entrar a Everlore"}
             </button>
           </form>
 
@@ -87,26 +104,15 @@ export function AuthCard({ mode }: Props) {
                 Ya tengo cuenta · Iniciar sesión
               </Link>
             ) : (
-              <>
-                <Link to="/signup" className="text-mint hover:text-neon transition-colors">
-                  ¿Aún no estás aquí? · Crear cuenta
-                </Link>
-                <div className="mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setError("Te enviaríamos un correo para restablecerla.")}
-                    className="text-ink-muted hover:text-mint text-xs"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </button>
-                </div>
-              </>
+              <Link to="/signup" className="text-mint hover:text-neon transition-colors">
+                ¿Aún no estás aquí? · Crear cuenta
+              </Link>
             )}
           </div>
         </div>
 
         <p className="mt-6 text-center text-[11px] text-ink-muted/70 italic">
-          “Las historias no se escriben solas. Se acompañan.”
+          "Las historias no se escriben solas. Se acompañan."
         </p>
       </div>
     </div>

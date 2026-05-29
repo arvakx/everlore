@@ -7,7 +7,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { initAuth } from "@/lib/auth";
 
 import appCss from "../styles.css?url";
 
@@ -109,6 +111,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => { initAuth(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
