@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon, History, Check, Loader2, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, type ImmersionTheme } from "@/lib/store";
 import { ChaptersPanel } from "@/components/workspace/ChaptersPanel";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
@@ -11,6 +12,9 @@ import { ExportMenu } from "@/components/ExportMenu";
 import { StorySettingsDialog } from "@/components/StorySettingsDialog";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { IMMERSION_TO_CATEGORY, playCategory, useAudioState } from "@/lib/audio";
+import { UndoRedo } from "@/components/UndoRedo";
+import { VersionHistoryDialog } from "@/components/VersionHistoryDialog";
+import { recordChange, seedScene, snapshot } from "@/lib/history";
 
 
 
