@@ -141,7 +141,7 @@ export function useUser() {
 
 // ============ Stories ============
 export function getStories(): Story[] { return readJSON<Story[]>(KEYS.stories, []); }
-function setStories(s: Story[]) { writeJSON(KEYS.stories, s); }
+export function setStoriesLocal(s: Story[]) { writeJSON(KEYS.stories, s); }
 
 export function useStories(): Story[] {
   const snap = useSyncExternalStore(
@@ -158,11 +158,11 @@ export function useStory(id: string | undefined): Story | undefined {
 
 const COVER_COLORS = ["#10B981", "#34D399", "#059669", "#22D3EE", "#7C3AED", "#0EA5E9"];
 
-export function createStory(input: { title?: string; logline?: string; coverColor?: string }): Story {
+function buildStory(input: { title?: string; logline?: string; coverColor?: string }): Story {
   const now = Date.now();
   const firstSceneId = uid();
-  const story: Story = {
-    id: uid(),
+  return {
+    id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : uid(),
     title: input.title?.trim() || "Sin título",
     logline: input.logline?.trim() || "",
     coverColor: input.coverColor || COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
@@ -173,19 +173,36 @@ export function createStory(input: { title?: string; logline?: string; coverColo
     bible: { characters: [], places: [], plotThreads: [], timeline: [], voice: "" },
     conversation: [], drafts: [], nudges: [],
   };
-  setStories([story, ...getStories()]);
-  return story;
+}
+
+/**
+ * Creates a story, persisting to Supabase first so the plan limit is enforced server-side.
+ */
+export async function createStory(input: { title?: string; logline?: string; coverColor?: string }): Promise<{ ok: true; story: Story } | { ok: false; error: string }> {
+  const story = buildStory(input);
+  const sync = await import("@/lib/stories-sync");
+  const res = await sync.pushCreateStory(story);
+  if (!res.ok) {
+    if (sync.isPlanLimitError(res.error)) {
+      return { ok: false, error: "Has alcanzado el límite de historias de tu plan." };
+    }
+    return { ok: false, error: res.error };
+  }
+  setStoriesLocal([res.story, ...getStories()]);
+  return { ok: true, story: res.story };
 }
 
 export function updateStory(id: string, updater: (s: Story) => Story) {
   const all = getStories();
   const idx = all.findIndex((s) => s.id === id); if (idx < 0) return;
   const next = updater(all[idx]); next.updatedAt = Date.now();
-  all[idx] = next; setStories(all);
+  all[idx] = next; setStoriesLocal(all);
+  void import("@/lib/stories-sync").then((m) => m.scheduleStoryPush(next));
 }
 
 export function deleteStory(id: string) {
-  setStories(getStories().filter((s) => s.id !== id));
+  setStoriesLocal(getStories().filter((s) => s.id !== id));
+  void import("@/lib/stories-sync").then((m) => m.pushDeleteStory(id));
 }
 
 export const planLimits: Record<Plan, number> = {
