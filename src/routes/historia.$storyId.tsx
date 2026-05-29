@@ -44,12 +44,17 @@ function Workspace() {
   const [showAssistant, setShowAssistant] = useState(true);
   const [showHealth, setShowHealth] = useState(false);
   const [immersionMenu, setImmersionMenu] = useState(false);
-  const [saveState, setSaveState] = useState<"saved" | "saving">("saved");
+  const [saveState, setSaveState] = useState<"saved" | "saving" | "synced">("saved");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [audioOpen, setAudioOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const audioState = useAudioState();
 
-
+  // Recovery + snapshot refs
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastContentRef = useRef<string>("");
+  const lastSnapshotRef = useRef<number>(0);
+  const lastRecoveryToastRef = useRef<number>(0);
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
   useEffect(() => {
@@ -67,6 +72,17 @@ function Workspace() {
     return fb ? { chapter: story.chapters[0], scene: fb } : null;
   }, [story]);
 
+  // Seed history and reset refs when scene changes
+  useEffect(() => {
+    if (!activeScene || !story) return;
+    seedScene(activeScene.scene.id, activeScene.scene.content);
+    lastContentRef.current = activeScene.scene.content;
+    lastSnapshotRef.current = Date.now();
+    // Initial snapshot for new scenes
+    snapshot(story.id, activeScene.scene.id, activeScene.scene.content, "Apertura de la escena");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeScene?.scene.id]);
+
   if (!story || !activeScene || !user) return null;
 
   const immersion = IMMERSION_OPTIONS.find((o) => o.id === user.immersionTheme) ?? IMMERSION_OPTIONS[0];
@@ -74,8 +90,12 @@ function Workspace() {
   function selectScene(sceneId: string) {
     updateStory(storyId, (s) => ({ ...s, lastOpenedSceneId: sceneId }));
   }
-  function updateSceneContent(html: string) {
-    setSaveState("saving");
+
+  function plainLen(html: string) {
+    return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().length;
+  }
+
+  function applyContent(html: string, opts?: { skipHistory?: boolean }) {
     updateStory(storyId, (s) => ({
       ...s,
       chapters: s.chapters.map((c) =>
@@ -84,11 +104,48 @@ function Workspace() {
           : c
       ),
     }));
-    // grant XP for words
+    if (!opts?.skipHistory) recordChange(activeScene!.scene.id, html);
+    lastContentRef.current = html;
+  }
+
+  function updateSceneContent(html: string) {
+    const prev = lastContentRef.current;
+    setSaveState("saving");
+
+    // Detect large accidental deletion (>=200 chars lost in a single tick)
+    const lost = plainLen(prev) - plainLen(html);
+    if (lost >= 200 && Date.now() - lastRecoveryToastRef.current > 4000) {
+      lastRecoveryToastRef.current = Date.now();
+      // Snapshot the pre-deletion state so it can always be recovered
+      snapshot(story!.id, activeScene!.scene.id, prev, `Antes de eliminar ${lost} caracteres`);
+      toast("Se eliminó un fragmento importante", {
+        description: `Lumi guardó la versión anterior (${lost} caracteres). ¿Deseas restaurarla?`,
+        duration: 12000,
+        action: {
+          label: "Restaurar",
+          onClick: () => applyContent(prev),
+        },
+      });
+    }
+
+    applyContent(html);
+
     const w = wordCount(html);
     if (w > 0 && w % 25 === 0) updateUser({ xp: (user?.xp ?? 0) + 1 });
-    setTimeout(() => setSaveState("saved"), 400);
+
+    // Debounced "saved" + snapshot every ~2 min while editing
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSaveState("synced");
+      const now = Date.now();
+      if (now - lastSnapshotRef.current > 2 * 60 * 1000) {
+        snapshot(story!.id, activeScene!.scene.id, html, "Guardado automático");
+        lastSnapshotRef.current = now;
+      }
+      setTimeout(() => setSaveState("saved"), 1400);
+    }, 800);
   }
+
   function updateSceneTitle(title: string) {
     updateStory(storyId, (s) => ({
       ...s,
@@ -110,7 +167,6 @@ function Workspace() {
     const suggested = IMMERSION_TO_CATEGORY[id];
     if (suggested && audioState.category !== suggested) playCategory(suggested);
   }
-
 
   const immersive = user.immersionTheme !== "ninguno";
 
