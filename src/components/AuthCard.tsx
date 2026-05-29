@@ -24,8 +24,15 @@ export function AuthCard({ mode }: Props) {
     }
     const existing = getUser();
     setUser({
-      name: isSignup ? name : existing?.name || email.split("@")[0],
+      name: isSignup ? name : "Gabriel Calderón",
       email,
+      plan: existing?.plan ?? "free",
+      proactiveNudges: existing?.proactiveNudges ?? true,
+      fontSize: existing?.fontSize ?? 19,
+      theme: existing?.theme ?? "light",
+    });
+    router.navigate({ to: "/" });
+  }
       plan: existing?.plan ?? "free",
       proactiveNudges: existing?.proactiveNudges ?? true,
       fontSize: existing?.fontSize ?? 19,
