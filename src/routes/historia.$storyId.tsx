@@ -370,7 +370,7 @@ function Workspace() {
 
         {/* Manuscript */}
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16 pb-28 sm:pb-32">
             {showHealth && !focus && (
               <div className="mb-6 sm:mb-8 animate-fade-up">
                 <StoryHealth story={story} />
