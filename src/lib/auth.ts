@@ -69,7 +69,7 @@ export async function persistUserPatch(patch: Partial<User>) {
     ...(patch.specialist !== undefined ? { specialist: patch.specialist } : {}),
     ...(patch.agentOverrides !== undefined ? { agent_overrides: patch.agentOverrides } : {}),
   };
-  await supabase.from("profiles").update(row).eq("id", session.user.id);
+  await supabase.from("profiles").update(row as never).eq("id", session.user.id);
 }
 
 export async function signUpWithEmail(name: string, email: string, password: string) {
