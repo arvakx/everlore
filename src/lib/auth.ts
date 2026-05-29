@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { setUser, getUser, type User, type ThemeMode, type ImmersionTheme, type AiSpecialist, type Plan } from "@/lib/store";
+import { setUser, setStoriesLocal, getUser, type User, type ThemeMode, type ImmersionTheme, type AiSpecialist, type Plan } from "@/lib/store";
 
 type ProfileRow = {
   id: string;
