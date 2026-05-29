@@ -3,14 +3,17 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import {
   useUser, useStories, timeOfDayGreeting, relativeEs, canCreateStory,
-  storyWordCount, computeRank,
+  storyWordCount, computeRank, type Story,
 } from "@/lib/store";
 import { generateReentryLine } from "@/lib/assistant";
 import { NewStoryDialog } from "@/components/NewStoryDialog";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
+import { StorySettingsDialog } from "@/components/StorySettingsDialog";
+import { ExportMenu } from "@/components/ExportMenu";
 import { LumiAvatar } from "@/components/LumiAvatar";
 import { Particles } from "@/components/Particles";
-import { Plus, BookOpen, Sparkles } from "lucide-react";
+import { Plus, BookOpen, Sparkles, Settings as SettingsIcon } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
