@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { createStory } from "@/lib/store";
 import { AURA_GROUPS, ALL_AURAS, type Aura } from "@/lib/auras";
-import { X, Sparkles, Wand2 } from "lucide-react";
+import { X, Sparkles, Wand2, Loader2 } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -14,6 +15,7 @@ export function NewStoryDialog({ open, onClose, onCreated }: Props) {
   const [logline, setLogline] = useState("");
   const [groupId, setGroupId] = useState(AURA_GROUPS[0].id);
   const [auraId, setAuraId] = useState<string>(AURA_GROUPS[0].auras[0].id);
+  const [busy, setBusy] = useState(false);
 
   const selected: Aura = useMemo(
     () => ALL_AURAS.find((a) => a.id === auraId) ?? AURA_GROUPS[0].auras[0],
@@ -23,10 +25,20 @@ export function NewStoryDialog({ open, onClose, onCreated }: Props) {
 
   if (!open) return null;
 
-  function create() {
-    const s = createStory({ title, logline, coverColor: selected.color });
-    setTitle(""); setLogline("");
-    onCreated(s.id);
+  async function create() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await createStory({ title, logline, coverColor: selected.color });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      setTitle(""); setLogline("");
+      onCreated(res.story.id);
+    } finally {
+      setBusy(false);
+    }
   }
 
   function suggestAura() {
@@ -167,8 +179,9 @@ export function NewStoryDialog({ open, onClose, onCreated }: Props) {
           <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm text-ink-muted hover:text-ink">
             Cancelar
           </button>
-          <button onClick={create} className="rounded-xl gradient-emerald px-5 py-2.5 text-sm font-medium text-primary-foreground hover:shadow-glow transition-all">
-            Encender historia
+          <button onClick={create} disabled={busy} className="rounded-xl gradient-emerald px-5 py-2.5 text-sm font-medium text-primary-foreground hover:shadow-glow transition-all disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-2">
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            {busy ? "Encendiendo…" : "Encender historia"}
           </button>
         </div>
       </div>

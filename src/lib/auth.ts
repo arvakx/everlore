@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { setUser, getUser, type User, type ThemeMode, type ImmersionTheme, type AiSpecialist, type Plan } from "@/lib/store";
+import { setUser, setStoriesLocal, getUser, type User, type ThemeMode, type ImmersionTheme, type AiSpecialist, type Plan } from "@/lib/store";
 
 type ProfileRow = {
   id: string;
@@ -32,7 +32,7 @@ function rowToUser(row: ProfileRow): User {
 
 export async function hydrateUserFromSession() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) { setUser(null); return; }
+  if (!session) { setUser(null); setStoriesLocal([]); return; }
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
@@ -40,6 +40,10 @@ export async function hydrateUserFromSession() {
     .maybeSingle();
   if (error) { console.error("profile fetch", error); return; }
   if (data) setUser(rowToUser(data as ProfileRow));
+  // Pull stories
+  const { pullAllStories } = await import("@/lib/stories-sync");
+  const stories = await pullAllStories();
+  if (stories) setStoriesLocal(stories);
 }
 
 let initialized = false;
@@ -114,6 +118,7 @@ export async function signInWithEmail(email: string, password: string) {
 export async function signOut() {
   await supabase.auth.signOut();
   setUser(null);
+  setStoriesLocal([]);
 }
 
 export function pushPatchAsync(patch: Partial<User>) {
