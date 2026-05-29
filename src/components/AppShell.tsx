@@ -1,6 +1,6 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { Home, BookText, Settings, LogOut } from "lucide-react";
+import { Home, Settings, LogOut } from "lucide-react";
 import { useUser, useStories, planLimits, setUser, useApplyTheme } from "@/lib/store";
 
 export function AppShell({ children }: { children: ReactNode }) {

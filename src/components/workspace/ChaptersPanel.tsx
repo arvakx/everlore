@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, ChevronDown, Plus, BookText, MoreVertical } from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, BookText } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Story } from "@/lib/store";
 import { newId, updateStory, wordCount } from "@/lib/store";
