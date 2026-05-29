@@ -336,9 +336,9 @@ function Workspace() {
             <div className="absolute inset-0 bg-black/50" />
             <div className="absolute top-16 right-3 left-3 rounded-2xl glass-strong border border-hairline p-2 grid grid-cols-3 gap-1.5 safe-top" onClick={(e) => e.stopPropagation()}>
               <MobileToolBtn icon={<Eye className="h-4 w-4" />} label="Inmersión" onClick={() => { setOverflowMenu(false); setImmersionMenu(true); }} />
-              <MobileToolBtn icon={<Activity className="h-4 w-4" />} label="Pulso" onClick={() => { setShowHealth((v) => !v); setOverflowMenu(false); }} />
+              <MobileToolBtn disabled icon={<Activity className="h-4 w-4" />} label="Pulso" onClick={() => {}} />
               <MobileToolBtn icon={<FlaskConical className="h-4 w-4" />} label="Lab" onClick={() => { setLabOpen(true); setOverflowMenu(false); }} />
-              <MobileToolBtn icon={<History className="h-4 w-4" />} label="Historial" onClick={() => { setHistoryOpen(true); setOverflowMenu(false); }} />
+              <MobileToolBtn disabled icon={<History className="h-4 w-4" />} label="Historial" onClick={() => {}} />
               <MobileToolBtn icon={<SettingsIcon className="h-4 w-4" />} label="Ajustes" onClick={() => { setSettingsOpen(true); setOverflowMenu(false); }} />
               <MobileToolBtn icon={<Maximize2 className="h-4 w-4" />} label="Foco" onClick={() => { setFocus(true); setOverflowMenu(false); }} />
             </div>
