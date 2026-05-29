@@ -300,7 +300,17 @@ function Workspace() {
             </div>
 
             {/* Mobile compact toolbar */}
-            <div className="md:hidden flex items-center gap-1 shrink-0">
+            <div className="md:hidden flex items-center gap-0.5 shrink-0">
+              {saveState === "saving" ? (
+                <Loader2 className="h-3.5 w-3.5 text-mint animate-spin mr-1" aria-label="Sincronizando" />
+              ) : (
+                <Check className="h-3.5 w-3.5 text-mint/70 mr-1" aria-label="Guardado" />
+              )}
+              <UndoRedo
+                sceneId={activeScene.scene.id}
+                current={activeScene.scene.content}
+                onApply={(html) => applyContent(html, { skipHistory: true })}
+              />
               <button
                 onClick={() => setShowAssistant(true)}
                 className="rounded-md p-1.5 text-mint hover:bg-accent"
@@ -323,7 +333,7 @@ function Workspace() {
         {overflowMenu && !focus && (
           <div className="md:hidden fixed inset-0 z-40 animate-fade-up" onClick={() => setOverflowMenu(false)}>
             <div className="absolute inset-0 bg-black/50" />
-            <div className="absolute top-14 right-3 left-3 rounded-2xl glass-strong border border-hairline p-2 grid grid-cols-3 gap-1.5" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute top-16 right-3 left-3 rounded-2xl glass-strong border border-hairline p-2 grid grid-cols-3 gap-1.5 safe-top" onClick={(e) => e.stopPropagation()}>
               <MobileToolBtn icon={<Eye className="h-4 w-4" />} label="Inmersión" onClick={() => { setOverflowMenu(false); setImmersionMenu(true); }} />
               <MobileToolBtn icon={<Activity className="h-4 w-4" />} label="Pulso" onClick={() => { setShowHealth((v) => !v); setOverflowMenu(false); }} />
               <MobileToolBtn icon={<FlaskConical className="h-4 w-4" />} label="Lab" onClick={() => { setLabOpen(true); setOverflowMenu(false); }} />
@@ -334,7 +344,7 @@ function Workspace() {
 
             {/* Mobile immersion sheet */}
             {immersionMenu && (
-              <div className="absolute inset-x-3 bottom-3 rounded-2xl glass-strong border border-hairline p-2 z-50" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute inset-x-3 bottom-3 rounded-2xl glass-strong border border-hairline p-2 z-50 safe-bottom max-h-[70vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 {IMMERSION_OPTIONS.map((o) => (
                   <button key={o.id} onClick={() => { setImmersion(o.id); setOverflowMenu(false); }}
                     className={`w-full text-left text-sm rounded-lg px-3 py-2.5 hover:bg-accent transition ${
@@ -347,6 +357,7 @@ function Workspace() {
             )}
           </div>
         )}
+
 
         {focus && (
           <button
