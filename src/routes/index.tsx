@@ -156,6 +156,8 @@ function Dashboard() {
         onCreated={(id) => { setNewOpen(false); router.navigate({ to: "/historia/$storyId", params: { storyId: id } }); }}
       />
       <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+      <StorySettingsDialog story={settingsStory} onClose={() => setSettingsStory(null)} />
+
     </AppShell>
   );
 }
