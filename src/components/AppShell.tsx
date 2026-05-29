@@ -1,7 +1,8 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Home, Settings, LogOut, Sparkles, Trophy, Menu, X, FlaskConical } from "lucide-react";
-import { useUser, useStories, planLimits, planLabels, setUser, useApplyTheme, computeRank } from "@/lib/store";
+import { useUser, useStories, planLimits, planLabels, useApplyTheme, computeRank } from "@/lib/store";
+import { signOut } from "@/lib/auth";
 import { LumiAvatar } from "@/components/LumiAvatar";
 
 export function AppShell({ children }: { children: ReactNode }) {
