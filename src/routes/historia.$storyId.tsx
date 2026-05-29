@@ -170,6 +170,17 @@ function Workspace() {
               <Activity className="h-3.5 w-3.5" /> Pulso
             </button>
 
+            <ExportMenu />
+
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald"
+              title="Ajustes de la historia"
+            >
+              <SettingsIcon className="h-3.5 w-3.5" />
+            </button>
+
+
             <button
               onClick={() => setFocus(true)}
               className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald"
