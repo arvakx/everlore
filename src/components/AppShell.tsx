@@ -4,6 +4,7 @@ import { Home, Settings, LogOut, Sparkles, Trophy, Menu, X, FlaskConical } from 
 import { useUser, useStories, planLimits, planLabels, useApplyTheme, computeRank } from "@/lib/store";
 import { signOut, useAuthReady } from "@/lib/auth";
 import { LumiAvatar } from "@/components/LumiAvatar";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 
 export function AppShell({ children }: { children: ReactNode }) {
   useApplyTheme();
