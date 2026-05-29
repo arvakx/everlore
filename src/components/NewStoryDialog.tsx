@@ -179,8 +179,9 @@ export function NewStoryDialog({ open, onClose, onCreated }: Props) {
           <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm text-ink-muted hover:text-ink">
             Cancelar
           </button>
-          <button onClick={create} className="rounded-xl gradient-emerald px-5 py-2.5 text-sm font-medium text-primary-foreground hover:shadow-glow transition-all">
-            Encender historia
+          <button onClick={create} disabled={busy} className="rounded-xl gradient-emerald px-5 py-2.5 text-sm font-medium text-primary-foreground hover:shadow-glow transition-all disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-2">
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            {busy ? "Encendiendo…" : "Encender historia"}
           </button>
         </div>
       </div>
