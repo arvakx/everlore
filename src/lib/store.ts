@@ -5,6 +5,7 @@ export type Plan = "free" | "cronista" | "leyenda";
 export type ImmersionTheme = "ninguno" | "biblioteca" | "lluvia" | "bosque" | "arcano" | "cyberpunk" | "espacio";
 export type AiSpecialist = "lumi" | "editor" | "fantasia" | "romance" | "mundos" | "terror" | "dialogos" | "coach";
 
+export interface AgentOverride { name?: string; tagline?: string; }
 export interface User {
   name: string;
   email: string;
@@ -15,6 +16,7 @@ export interface User {
   xp: number;
   immersionTheme: ImmersionTheme;
   specialist: AiSpecialist;
+  agentOverrides?: Partial<Record<AiSpecialist, AgentOverride>>;
 }
 
 export interface Scene {
