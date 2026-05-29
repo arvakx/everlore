@@ -111,7 +111,7 @@ function Workspace() {
   const immersive = user.immersionTheme !== "ninguno";
 
   return (
-    <div className={`relative flex h-screen w-full overflow-hidden ${immersive ? immersion.className : "bg-ambient"}`}>
+    <div className={`relative flex h-screen w-full overflow-hidden ${focus ? "focus-mode" : ""} ${immersive ? immersion.className : "bg-ambient"}`}>
       {immersive && <Particles count={30} />}
 
       {/* Chapters panel */}
