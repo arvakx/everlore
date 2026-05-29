@@ -199,10 +199,36 @@ function Workspace() {
               className="bg-transparent font-serif text-base text-ink outline-none px-2 py-1 rounded hover:bg-accent/40 focus:bg-accent/60 min-w-0 max-w-[280px]"
             />
             <div className="flex-1" />
-            <div className="text-xs text-ink-muted hidden sm:block">
-              {wordCount(activeScene.scene.content).toLocaleString("es")} palabras ·{" "}
-              <span className="italic">{saveState === "saved" ? "Guardado" : "Guardando…"}</span>
+
+            {/* Save indicator */}
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-ink-muted">
+              <span>{wordCount(activeScene.scene.content).toLocaleString("es")} palabras</span>
+              <span className="opacity-40">·</span>
+              {saveState === "saving" ? (
+                <span className="inline-flex items-center gap-1 text-mint"><Loader2 className="h-3 w-3 animate-spin" /> Sincronizando…</span>
+              ) : saveState === "synced" ? (
+                <span className="inline-flex items-center gap-1 text-mint"><Check className="h-3 w-3" /> Guardado automáticamente</span>
+              ) : (
+                <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-mint" /> Todos los cambios guardados</span>
+              )}
             </div>
+
+            {/* Undo / Redo */}
+            <UndoRedo
+              sceneId={activeScene.scene.id}
+              current={activeScene.scene.content}
+              onApply={(html) => applyContent(html, { skipHistory: true })}
+            />
+
+            {/* Version history */}
+            <button
+              onClick={() => setHistoryOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition"
+              title="Historial de versiones"
+            >
+              <History className="h-3.5 w-3.5" /> Historial
+            </button>
+
 
             {/* Immersion picker */}
             <div className="relative">
