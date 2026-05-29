@@ -107,21 +107,25 @@ export function AssistantPanel({ story, onInsertDraft }: Props) {
 
         {specialistOpen && (
           <div className="rounded-xl border border-hairline bg-paper-elevated/80 p-2 max-h-72 overflow-y-auto animate-fade-up">
-            {SPECIALISTS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setSpecialist(s.id)}
-                className={`w-full text-left flex items-start gap-2 rounded-lg px-2.5 py-2 hover:bg-accent transition ${
-                  specialist.id === s.id ? "bg-accent" : ""
-                }`}
-              >
-                <LumiAvatar size={22} state={s.id === "lumi" ? "mystic" : s.id === "terror" ? "thinking" : "idle"} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-ink leading-tight">{s.name}</div>
-                  <div className="text-[10px] text-ink-muted">{s.tagline} · {s.tone}</div>
-                </div>
-              </button>
-            ))}
+            {SPECIALISTS.map((s) => {
+              const r = resolveSpecialist(s.id, user);
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setSpecialist(s.id)}
+                  className={`w-full text-left flex items-start gap-2 rounded-lg px-2.5 py-2 hover:bg-accent transition ${
+                    specialist.id === s.id ? "bg-accent" : ""
+                  }`}
+                >
+                  <LumiAvatar size={22} state={s.id === "lumi" ? "mystic" : s.id === "terror" ? "thinking" : "idle"} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-ink leading-tight">{r.name}</div>
+                    <div className="text-[10px] text-ink-muted">{r.tagline} · {s.tone}</div>
+                  </div>
+                </button>
+              );
+            })}
+
           </div>
         )}
 
