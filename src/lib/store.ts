@@ -5,6 +5,7 @@ export type Plan = "free" | "cronista" | "leyenda";
 export type ImmersionTheme = "ninguno" | "biblioteca" | "lluvia" | "bosque" | "arcano" | "cyberpunk" | "espacio";
 export type AiSpecialist = "lumi" | "editor" | "fantasia" | "romance" | "mundos" | "terror" | "dialogos" | "coach";
 
+export type ThemeMode = "noche" | "alba" | "dia";
 export interface AgentOverride { name?: string; tagline?: string; }
 export interface User {
   name: string;
@@ -12,7 +13,7 @@ export interface User {
   plan: Plan;
   proactiveNudges: boolean;
   fontSize: number;
-  theme: "light" | "dark";
+  theme: ThemeMode;
   xp: number;
   immersionTheme: ImmersionTheme;
   specialist: AiSpecialist;
