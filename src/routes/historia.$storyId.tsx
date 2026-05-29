@@ -250,7 +250,9 @@ function Workspace() {
       )}
 
       <StorySettingsDialog story={settingsOpen ? story : null} onClose={() => setSettingsOpen(false)} onDeleted={() => router.navigate({ to: "/" })} />
+      <AudioPlayer variant="mini" open={audioOpen} onClose={() => setAudioOpen(false)} />
     </div>
+
 
   );
 }
