@@ -1,5 +1,5 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Home, Settings, LogOut } from "lucide-react";
 import { useUser, useStories, planLimits, setUser, useApplyTheme } from "@/lib/store";
 
@@ -10,11 +10,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const stories = useStories();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  useEffect(() => {
-    if (!user) router.navigate({ to: "/login" });
-  }, [user, router]);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
-  if (!user) return null;
+  useEffect(() => {
+    if (mounted && !user) router.navigate({ to: "/login" });
+  }, [mounted, user, router]);
+
+  if (!mounted || !user) return null;
 
   const limit = planLimits[user.plan];
   const used = stories.length;
