@@ -12,19 +12,19 @@ import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-serif text-ink">404</h1>
-        <h2 className="mt-4 text-xl text-ink">Esta página no existe</h2>
+    <div className="flex min-h-screen items-center justify-center bg-aurora px-4">
+      <div className="max-w-md text-center glass-strong rounded-3xl p-10 glow-border">
+        <h1 className="text-7xl font-serif gradient-text text-glow">404</h1>
+        <h2 className="mt-4 text-xl text-ink font-serif">Este rincón aún no existe</h2>
         <p className="mt-2 text-sm text-ink-muted">
-          Tal vez te perdiste de camino a tu historia. Vuelve al inicio cuando quieras.
+          Tal vez te perdiste de camino a tu historia. Lumi te espera al inicio.
         </p>
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-lg bg-ember px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-ember-hover"
+            className="inline-flex items-center justify-center rounded-xl gradient-emerald px-5 py-2.5 text-sm font-medium text-primary-foreground hover:shadow-glow transition"
           >
-            Volver al inicio
+            Volver a Everlore
           </Link>
         </div>
       </div>
@@ -36,20 +36,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-serif text-ink">Algo se trabó</h1>
+    <div className="flex min-h-screen items-center justify-center bg-aurora px-4">
+      <div className="max-w-md text-center glass-strong rounded-3xl p-10 glow-border">
+        <h1 className="text-xl font-serif text-ink">Algo se trabó en el éter</h1>
         <p className="mt-2 text-sm text-ink-muted">
           Intenta de nuevo. Tu trabajo está guardado.
         </p>
         <div className="mt-6 flex justify-center gap-2">
           <button
             onClick={() => { router.invalidate(); reset(); }}
-            className="rounded-lg bg-ember px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-ember-hover"
+            className="rounded-xl gradient-emerald px-4 py-2 text-sm font-medium text-primary-foreground hover:shadow-glow"
           >
             Reintentar
           </button>
-          <a href="/" className="rounded-lg border border-hairline bg-paper-elevated px-4 py-2 text-sm font-medium text-ink hover:bg-accent">
+          <a href="/" className="rounded-xl border border-hairline bg-paper-elevated px-4 py-2 text-sm font-medium text-ink hover:border-emerald">
             Inicio
           </a>
         </div>
@@ -63,11 +63,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Writedy — Tu espacio para escribir, acompañado" },
-      { name: "description", content: "Writedy es un espacio cálido y profesional para escribir tu libro, con un asistente que conoce tu historia." },
-      { name: "author", content: "Writedy" },
-      { property: "og:title", content: "Writedy" },
-      { property: "og:description", content: "Tu espacio para escribir, acompañado." },
+      { title: "Everlore — Tu universo creativo, acompañado por Lumi" },
+      { name: "description", content: "Everlore es un santuario inteligente para escribir tu novela: Lumi, tu asistente narrativo, recuerda tu mundo y camina contigo." },
+      { name: "author", content: "Everlore" },
+      { name: "theme-color", content: "#10B981" },
+      { property: "og:title", content: "Everlore" },
+      { property: "og:description", content: "Tu universo creativo, acompañado por Lumi." },
       { property: "og:type", content: "website" },
     ],
     links: [
@@ -76,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter+Tight:wght@400;500;600;700&display=swap",
       },
     ],
   }),
