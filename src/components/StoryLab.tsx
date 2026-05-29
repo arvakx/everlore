@@ -101,34 +101,43 @@ export function StoryLab({ story, open, onClose, onInsertText }: Props) {
 function FeatureDetail({ id, story, onInsertText, onClose }: { id: FeatureId; story: Story; onInsertText?: (t: string) => void; onClose: () => void }) {
   const f = FEATURES.find((x) => x.id === id)!;
   const Icon = f.icon;
+  const avail = isAvailable(id);
 
   return (
     <div className="space-y-5 max-w-2xl">
       <div className="flex items-start gap-3">
-        <div className="rounded-xl gradient-emerald p-2.5 text-primary-foreground glow-ring">
+        <div className={`rounded-xl p-2.5 text-primary-foreground ${avail ? "gradient-emerald glow-ring" : "bg-paper-elevated border border-hairline text-ink-muted"}`}>
           <Icon className="h-5 w-5" />
         </div>
-        <div>
-          <h3 className="font-serif text-2xl text-ink">{f.label}</h3>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-serif text-2xl text-ink">{f.label}</h3>
+            {!avail && (
+              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-mint border border-emerald/40 bg-accent/40 rounded-full px-2 py-0.5">
+                <Lock className="h-3 w-3" /> Próximamente
+              </span>
+            )}
+          </div>
           <p className="text-sm text-mint italic">{f.tagline}</p>
         </div>
       </div>
 
-      {id === "chapter" && <ChapterFeature story={story} />}
-      {id === "decisions" && <DecisionsFeature story={story} />}
-      {id === "memory" && <MemoryFeature story={story} />}
-      {id === "scene" && <SceneFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "dual" && <DualEditorFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "rpg" && <RpgFeature />}
-      {id === "reader" && <ReaderFeature />}
-      {id === "blocks" && <BlocksFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "universe" && <UniverseFeature />}
-      {id === "publish" && <PublishFeature />}
-      {id === "anti" && <AntiFeature />}
-      {id === "canon" && <CanonFeature story={story} />}
-      {id === "daily" && <DailyFeature />}
-      {id === "style" && <StyleFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "coauthor" && <CoauthorFeature onInsertText={onInsertText} onClose={onClose} />}
+      {!avail ? (
+        <div className="rounded-2xl border border-hairline bg-paper-elevated/60 p-8 text-center glow-border">
+          <Lock className="h-8 w-8 text-mint mx-auto mb-3" />
+          <h4 className="font-serif text-xl text-ink mb-2">Próximamente en Everlore</h4>
+          <p className="text-sm text-ink-muted max-w-md mx-auto">
+            Estamos forjando esta función con el cuidado que tu historia merece. Te avisaremos en cuanto esté lista para ti.
+          </p>
+        </div>
+      ) : (
+        <>
+          {id === "blocks" && <BlocksFeature onInsertText={onInsertText} onClose={onClose} />}
+          {id === "publish" && <PublishFeature />}
+          {id === "anti" && <AntiFeature />}
+          {id === "canon" && <CanonFeature story={story} />}
+        </>
+      )}
     </div>
   );
 }
