@@ -33,13 +33,6 @@ export function AuthCard({ mode }: Props) {
     });
     router.navigate({ to: "/" });
   }
-      plan: existing?.plan ?? "free",
-      proactiveNudges: existing?.proactiveNudges ?? true,
-      fontSize: existing?.fontSize ?? 19,
-      theme: existing?.theme ?? "light",
-    });
-    router.navigate({ to: "/" });
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-paper px-4">
