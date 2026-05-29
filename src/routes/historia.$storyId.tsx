@@ -435,12 +435,15 @@ function Workspace() {
 const toolBtnCls =
   "inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition";
 
-function MobileToolBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+function MobileToolBtn({ icon, label, onClick, disabled }: { icon: React.ReactNode; label: string; onClick: () => void; disabled?: boolean }) {
   return (
-    <button onClick={onClick}
-      className="flex flex-col items-center gap-1 rounded-xl border border-hairline bg-paper-elevated/70 px-2 py-3 text-[10px] uppercase tracking-widest text-ink hover:border-emerald hover:text-mint transition">
+    <button onClick={disabled ? undefined : onClick} disabled={disabled} title={disabled ? "Próximamente" : undefined}
+      className={`relative flex flex-col items-center gap-1 rounded-xl border border-hairline bg-paper-elevated/70 px-2 py-3 text-[10px] uppercase tracking-widest text-ink transition ${
+        disabled ? "opacity-50 cursor-not-allowed" : "hover:border-emerald hover:text-mint"
+      }`}>
       {icon}
       <span>{label}</span>
+      {disabled && <span className="absolute -top-1.5 right-1 text-[8px] tracking-widest text-mint/80 bg-paper-elevated border border-hairline rounded px-1">Pronto</span>}
     </button>
   );
 }
