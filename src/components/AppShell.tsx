@@ -9,6 +9,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useApplyTheme();
   const router = useRouter();
   const user = useUser();
+  const authReady = useAuthReady();
   const stories = useStories();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -17,10 +18,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
-    if (mounted && !user) router.navigate({ to: "/login" });
-  }, [mounted, user, router]);
+    if (mounted && authReady && !user) router.navigate({ to: "/login" });
+  }, [mounted, authReady, user, router]);
   useEffect(() => { setDrawerOpen(false); }, [pathname]);
-  if (!mounted || !user) return null;
+  if (!mounted || !authReady || !user) return null;
 
   const limit = planLimits[user.plan];
   const used = stories.length;
