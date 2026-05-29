@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon, History, Check, Loader2, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, type ImmersionTheme } from "@/lib/store";
 import { ChaptersPanel } from "@/components/workspace/ChaptersPanel";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
@@ -11,6 +12,9 @@ import { ExportMenu } from "@/components/ExportMenu";
 import { StorySettingsDialog } from "@/components/StorySettingsDialog";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { IMMERSION_TO_CATEGORY, playCategory, useAudioState } from "@/lib/audio";
+import { UndoRedo } from "@/components/UndoRedo";
+import { VersionHistoryDialog } from "@/components/VersionHistoryDialog";
+import { recordChange, seedScene, snapshot } from "@/lib/history";
 
 
 
@@ -40,12 +44,17 @@ function Workspace() {
   const [showAssistant, setShowAssistant] = useState(true);
   const [showHealth, setShowHealth] = useState(false);
   const [immersionMenu, setImmersionMenu] = useState(false);
-  const [saveState, setSaveState] = useState<"saved" | "saving">("saved");
+  const [saveState, setSaveState] = useState<"saved" | "saving" | "synced">("saved");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [audioOpen, setAudioOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const audioState = useAudioState();
 
-
+  // Recovery + snapshot refs
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastContentRef = useRef<string>("");
+  const lastSnapshotRef = useRef<number>(0);
+  const lastRecoveryToastRef = useRef<number>(0);
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
   useEffect(() => {
@@ -63,6 +72,17 @@ function Workspace() {
     return fb ? { chapter: story.chapters[0], scene: fb } : null;
   }, [story]);
 
+  // Seed history and reset refs when scene changes
+  useEffect(() => {
+    if (!activeScene || !story) return;
+    seedScene(activeScene.scene.id, activeScene.scene.content);
+    lastContentRef.current = activeScene.scene.content;
+    lastSnapshotRef.current = Date.now();
+    // Initial snapshot for new scenes
+    snapshot(story.id, activeScene.scene.id, activeScene.scene.content, "Apertura de la escena");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeScene?.scene.id]);
+
   if (!story || !activeScene || !user) return null;
 
   const immersion = IMMERSION_OPTIONS.find((o) => o.id === user.immersionTheme) ?? IMMERSION_OPTIONS[0];
@@ -70,8 +90,12 @@ function Workspace() {
   function selectScene(sceneId: string) {
     updateStory(storyId, (s) => ({ ...s, lastOpenedSceneId: sceneId }));
   }
-  function updateSceneContent(html: string) {
-    setSaveState("saving");
+
+  function plainLen(html: string) {
+    return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().length;
+  }
+
+  function applyContent(html: string, opts?: { skipHistory?: boolean }) {
     updateStory(storyId, (s) => ({
       ...s,
       chapters: s.chapters.map((c) =>
@@ -80,11 +104,48 @@ function Workspace() {
           : c
       ),
     }));
-    // grant XP for words
+    if (!opts?.skipHistory) recordChange(activeScene!.scene.id, html);
+    lastContentRef.current = html;
+  }
+
+  function updateSceneContent(html: string) {
+    const prev = lastContentRef.current;
+    setSaveState("saving");
+
+    // Detect large accidental deletion (>=200 chars lost in a single tick)
+    const lost = plainLen(prev) - plainLen(html);
+    if (lost >= 200 && Date.now() - lastRecoveryToastRef.current > 4000) {
+      lastRecoveryToastRef.current = Date.now();
+      // Snapshot the pre-deletion state so it can always be recovered
+      snapshot(story!.id, activeScene!.scene.id, prev, `Antes de eliminar ${lost} caracteres`);
+      toast("Se eliminó un fragmento importante", {
+        description: `Lumi guardó la versión anterior (${lost} caracteres). ¿Deseas restaurarla?`,
+        duration: 12000,
+        action: {
+          label: "Restaurar",
+          onClick: () => applyContent(prev),
+        },
+      });
+    }
+
+    applyContent(html);
+
     const w = wordCount(html);
     if (w > 0 && w % 25 === 0) updateUser({ xp: (user?.xp ?? 0) + 1 });
-    setTimeout(() => setSaveState("saved"), 400);
+
+    // Debounced "saved" + snapshot every ~2 min while editing
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSaveState("synced");
+      const now = Date.now();
+      if (now - lastSnapshotRef.current > 2 * 60 * 1000) {
+        snapshot(story!.id, activeScene!.scene.id, html, "Guardado automático");
+        lastSnapshotRef.current = now;
+      }
+      setTimeout(() => setSaveState("saved"), 1400);
+    }, 800);
   }
+
   function updateSceneTitle(title: string) {
     updateStory(storyId, (s) => ({
       ...s,
@@ -106,7 +167,6 @@ function Workspace() {
     const suggested = IMMERSION_TO_CATEGORY[id];
     if (suggested && audioState.category !== suggested) playCategory(suggested);
   }
-
 
   const immersive = user.immersionTheme !== "ninguno";
 
@@ -139,10 +199,36 @@ function Workspace() {
               className="bg-transparent font-serif text-base text-ink outline-none px-2 py-1 rounded hover:bg-accent/40 focus:bg-accent/60 min-w-0 max-w-[280px]"
             />
             <div className="flex-1" />
-            <div className="text-xs text-ink-muted hidden sm:block">
-              {wordCount(activeScene.scene.content).toLocaleString("es")} palabras ·{" "}
-              <span className="italic">{saveState === "saved" ? "Guardado" : "Guardando…"}</span>
+
+            {/* Save indicator */}
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-ink-muted">
+              <span>{wordCount(activeScene.scene.content).toLocaleString("es")} palabras</span>
+              <span className="opacity-40">·</span>
+              {saveState === "saving" ? (
+                <span className="inline-flex items-center gap-1 text-mint"><Loader2 className="h-3 w-3 animate-spin" /> Sincronizando…</span>
+              ) : saveState === "synced" ? (
+                <span className="inline-flex items-center gap-1 text-mint"><Check className="h-3 w-3" /> Guardado automáticamente</span>
+              ) : (
+                <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-mint" /> Todos los cambios guardados</span>
+              )}
             </div>
+
+            {/* Undo / Redo */}
+            <UndoRedo
+              sceneId={activeScene.scene.id}
+              current={activeScene.scene.content}
+              onApply={(html) => applyContent(html, { skipHistory: true })}
+            />
+
+            {/* Version history */}
+            <button
+              onClick={() => setHistoryOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition"
+              title="Historial de versiones"
+            >
+              <History className="h-3.5 w-3.5" /> Historial
+            </button>
+
 
             {/* Immersion picker */}
             <div className="relative">
@@ -251,6 +337,15 @@ function Workspace() {
 
       <StorySettingsDialog story={settingsOpen ? story : null} onClose={() => setSettingsOpen(false)} onDeleted={() => router.navigate({ to: "/" })} />
       <AudioPlayer variant="mini" open={audioOpen} onClose={() => setAudioOpen(false)} />
+      <VersionHistoryDialog
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        storyId={storyId}
+        sceneId={activeScene.scene.id}
+        currentContent={activeScene.scene.content}
+        onRestore={(html) => applyContent(html)}
+      />
+
     </div>
 
 
