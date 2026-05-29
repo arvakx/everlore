@@ -9,6 +9,9 @@ import { StoryHealth } from "@/components/StoryHealth";
 import { Particles } from "@/components/Particles";
 import { ExportMenu } from "@/components/ExportMenu";
 import { StorySettingsDialog } from "@/components/StorySettingsDialog";
+import { AudioPlayer } from "@/components/AudioPlayer";
+import { IMMERSION_TO_CATEGORY, playCategory, useAudioState } from "@/lib/audio";
+
 
 
 export const Route = createFileRoute("/historia/$storyId")({
