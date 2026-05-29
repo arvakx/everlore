@@ -9,6 +9,9 @@ import { StoryHealth } from "@/components/StoryHealth";
 import { Particles } from "@/components/Particles";
 import { ExportMenu } from "@/components/ExportMenu";
 import { StorySettingsDialog } from "@/components/StorySettingsDialog";
+import { AudioPlayer } from "@/components/AudioPlayer";
+import { IMMERSION_TO_CATEGORY, playCategory, useAudioState } from "@/lib/audio";
+
 
 
 export const Route = createFileRoute("/historia/$storyId")({
@@ -39,6 +42,9 @@ function Workspace() {
   const [immersionMenu, setImmersionMenu] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "saving">("saved");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [audioOpen, setAudioOpen] = useState(false);
+  const audioState = useAudioState();
+
 
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
@@ -97,12 +103,15 @@ function Workspace() {
   function setImmersion(id: ImmersionTheme) {
     updateUser({ immersionTheme: id });
     setImmersionMenu(false);
+    const suggested = IMMERSION_TO_CATEGORY[id];
+    if (suggested && audioState.category !== suggested) playCategory(suggested);
   }
+
 
   const immersive = user.immersionTheme !== "ninguno";
 
   return (
-    <div className={`relative flex h-screen w-full overflow-hidden ${immersive ? immersion.className : "bg-ambient"}`}>
+    <div className={`relative flex h-screen w-full overflow-hidden ${focus ? "focus-mode" : ""} ${immersive ? immersion.className : "bg-ambient"}`}>
       {immersive && <Particles count={30} />}
 
       {/* Chapters panel */}
@@ -241,7 +250,9 @@ function Workspace() {
       )}
 
       <StorySettingsDialog story={settingsOpen ? story : null} onClose={() => setSettingsOpen(false)} onDeleted={() => router.navigate({ to: "/" })} />
+      <AudioPlayer variant="mini" open={audioOpen} onClose={() => setAudioOpen(false)} />
     </div>
+
 
   );
 }

@@ -387,3 +387,19 @@
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--color-hairline); border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ============ Audio waveform ============ */
+@keyframes wave-bar {
+  0%   { transform: scaleY(0.4); }
+  100% { transform: scaleY(1); }
+}
+
+/* Focus mode — soften & calm the whole interface */
+.focus-mode .lumi-orb,
+.focus-mode .particles span,
+.focus-mode .lumi-halo {
+  animation-duration: 9s !important;
+  opacity: 0.5;
+}
+.focus-mode .glow-border::before { opacity: 0.4; }
+.focus-mode * { transition-duration: 600ms; }
