@@ -328,3 +328,9 @@ export const SPECIALISTS: { id: AiSpecialist; name: string; tagline: string; ton
   { id: "dialogos", name: "Eco",             tagline: "Especialista en diálogos", tone: "rítmica, viva, teatral" },
   { id: "coach",    name: "Lyra",            tagline: "Coach creativa",      tone: "empática, motivadora, suave" },
 ];
+
+export function resolveSpecialist(id: AiSpecialist, user: User | null) {
+  const base = SPECIALISTS.find((s) => s.id === id) ?? SPECIALISTS[0];
+  const o = user?.agentOverrides?.[id];
+  return { ...base, name: o?.name?.trim() || base.name, tagline: o?.tagline?.trim() || base.tagline };
+}
