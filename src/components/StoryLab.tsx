@@ -40,7 +40,7 @@ const FEATURES: { id: FeatureId; label: string; icon: typeof Wand2; tagline: str
 ];
 
 export function StoryLab({ story, open, onClose, onInsertText }: Props) {
-  const [active, setActive] = useState<FeatureId>("chapter");
+  const [active, setActive] = useState<FeatureId>("blocks");
   if (!open) return null;
 
   return (
@@ -69,16 +69,19 @@ export function StoryLab({ story, open, onClose, onInsertText }: Props) {
               {FEATURES.map((f) => {
                 const sel = f.id === active;
                 const Icon = f.icon;
+                const avail = isAvailable(f.id);
                 return (
                   <button
                     key={f.id}
                     onClick={() => setActive(f.id)}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap md:whitespace-normal text-left ${
+                    title={avail ? undefined : "Próximamente"}
+                    className={`group relative flex items-center gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap md:whitespace-normal text-left ${
                       sel ? "bg-accent text-mint border border-emerald" : "text-ink-muted hover:text-ink hover:bg-accent/40 border border-transparent"
-                    }`}
+                    } ${avail ? "" : "opacity-60"}`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     <span className="truncate">{f.label}</span>
+                    {!avail && <Lock className="h-3 w-3 ml-auto text-mint/70 shrink-0" />}
                   </button>
                 );
               })}
