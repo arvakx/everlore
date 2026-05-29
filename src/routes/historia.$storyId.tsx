@@ -337,6 +337,15 @@ function Workspace() {
 
       <StorySettingsDialog story={settingsOpen ? story : null} onClose={() => setSettingsOpen(false)} onDeleted={() => router.navigate({ to: "/" })} />
       <AudioPlayer variant="mini" open={audioOpen} onClose={() => setAudioOpen(false)} />
+      <VersionHistoryDialog
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        storyId={storyId}
+        sceneId={activeScene.scene.id}
+        currentContent={activeScene.scene.content}
+        onRestore={(html) => applyContent(html)}
+      />
+
     </div>
 
 
