@@ -1,6 +1,9 @@
 import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon, History, Check, Loader2, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon,
+  History, Check, Loader2, ShieldCheck, BookOpen, Menu, FlaskConical, MoreHorizontal, X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, type ImmersionTheme } from "@/lib/store";
 import { ChaptersPanel } from "@/components/workspace/ChaptersPanel";
@@ -15,8 +18,7 @@ import { IMMERSION_TO_CATEGORY, playCategory, useAudioState } from "@/lib/audio"
 import { UndoRedo } from "@/components/UndoRedo";
 import { VersionHistoryDialog } from "@/components/VersionHistoryDialog";
 import { recordChange, seedScene, snapshot } from "@/lib/history";
-
-
+import { StoryLab } from "@/components/StoryLab";
 
 export const Route = createFileRoute("/historia/$storyId")({
   head: () => ({ meta: [{ title: "Escribiendo — Everlore" }] }),
@@ -41,16 +43,18 @@ function Workspace() {
   const story = useStory(storyId);
 
   const [focus, setFocus] = useState(false);
-  const [showAssistant, setShowAssistant] = useState(true);
+  const [showAssistant, setShowAssistant] = useState(false);
+  const [showChapters, setShowChapters] = useState(false);
   const [showHealth, setShowHealth] = useState(false);
   const [immersionMenu, setImmersionMenu] = useState(false);
+  const [overflowMenu, setOverflowMenu] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "saving" | "synced">("saved");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [audioOpen, setAudioOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [labOpen, setLabOpen] = useState(false);
   const audioState = useAudioState();
 
-  // Recovery + snapshot refs
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastContentRef = useRef<string>("");
   const lastSnapshotRef = useRef<number>(0);
@@ -72,13 +76,11 @@ function Workspace() {
     return fb ? { chapter: story.chapters[0], scene: fb } : null;
   }, [story]);
 
-  // Seed history and reset refs when scene changes
   useEffect(() => {
     if (!activeScene || !story) return;
     seedScene(activeScene.scene.id, activeScene.scene.content);
     lastContentRef.current = activeScene.scene.content;
     lastSnapshotRef.current = Date.now();
-    // Initial snapshot for new scenes
     snapshot(story.id, activeScene.scene.id, activeScene.scene.content, "Apertura de la escena");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeScene?.scene.id]);
@@ -89,6 +91,7 @@ function Workspace() {
 
   function selectScene(sceneId: string) {
     updateStory(storyId, (s) => ({ ...s, lastOpenedSceneId: sceneId }));
+    setShowChapters(false);
   }
 
   function plainLen(html: string) {
@@ -112,19 +115,14 @@ function Workspace() {
     const prev = lastContentRef.current;
     setSaveState("saving");
 
-    // Detect large accidental deletion (>=200 chars lost in a single tick)
     const lost = plainLen(prev) - plainLen(html);
     if (lost >= 200 && Date.now() - lastRecoveryToastRef.current > 4000) {
       lastRecoveryToastRef.current = Date.now();
-      // Snapshot the pre-deletion state so it can always be recovered
       snapshot(story!.id, activeScene!.scene.id, prev, `Antes de eliminar ${lost} caracteres`);
       toast("Se eliminó un fragmento importante", {
         description: `Lumi guardó la versión anterior (${lost} caracteres). ¿Deseas restaurarla?`,
         duration: 12000,
-        action: {
-          label: "Restaurar",
-          onClick: () => applyContent(prev),
-        },
+        action: { label: "Restaurar", onClick: () => applyContent(prev) },
       });
     }
 
@@ -133,7 +131,6 @@ function Workspace() {
     const w = wordCount(html);
     if (w > 0 && w % 25 === 0) updateUser({ xp: (user?.xp ?? 0) + 1 });
 
-    // Debounced "saved" + snapshot every ~2 min while editing
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setSaveState("synced");
@@ -171,13 +168,26 @@ function Workspace() {
   const immersive = user.immersionTheme !== "ninguno";
 
   return (
-    <div className={`relative flex h-screen w-full overflow-hidden ${focus ? "focus-mode" : ""} ${immersive ? immersion.className : "bg-ambient"}`}>
+    <div
+      className={`relative flex h-[100dvh] w-full overflow-hidden aura-transition ${focus ? "focus-mode" : ""} ${immersive ? immersion.className : "bg-ambient"}`}
+      style={{ ["--story-aura" as any]: story.coverColor }}
+    >
       {immersive && <Particles count={30} />}
 
-      {/* Chapters panel */}
+      {/* Desktop chapters panel */}
       {!focus && (
-        <div className="w-64 shrink-0 hidden md:block relative z-10">
+        <div className="w-64 shrink-0 hidden lg:block relative z-10">
           <ChaptersPanel story={story} activeSceneId={activeScene.scene.id} onSelectScene={selectScene} />
+        </div>
+      )}
+
+      {/* Mobile chapters drawer */}
+      {showChapters && !focus && (
+        <div className="lg:hidden fixed inset-0 z-50 flex animate-fade-up">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowChapters(false)} />
+          <div className="relative w-80 max-w-[85vw] h-[100dvh] safe-top safe-bottom">
+            <ChaptersPanel story={story} activeSceneId={activeScene.scene.id} onSelectScene={selectScene} />
+          </div>
         </div>
       )}
 
@@ -185,113 +195,155 @@ function Workspace() {
       <div className="flex flex-1 flex-col min-w-0 relative z-10">
         {/* Top bar */}
         {!focus && (
-          <div className="flex items-center gap-2 border-b border-hairline px-5 py-3 glass">
+          <div className="flex items-center gap-1.5 sm:gap-2 border-b border-hairline px-3 sm:px-5 py-2.5 sm:py-3 glass safe-top">
             <button
               onClick={() => router.navigate({ to: "/" })}
-              className="rounded-md p-1.5 text-ink-muted hover:bg-accent hover:text-mint"
+              className="rounded-md p-1.5 text-ink-muted hover:bg-accent hover:text-mint shrink-0"
               aria-label="Inicio"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
+
+            <button
+              onClick={() => setShowChapters(true)}
+              className="lg:hidden rounded-md p-1.5 text-ink-muted hover:bg-accent hover:text-mint shrink-0"
+              aria-label="Capítulos"
+            >
+              <BookOpen className="h-4 w-4" />
+            </button>
+
             <input
               value={story.title}
               onChange={(e) => updateTitle(e.target.value)}
-              className="bg-transparent font-serif text-base text-ink outline-none px-2 py-1 rounded hover:bg-accent/40 focus:bg-accent/60 min-w-0 max-w-[280px]"
+              className="bg-transparent font-serif text-sm sm:text-base text-ink outline-none px-1.5 sm:px-2 py-1 rounded hover:bg-accent/40 focus:bg-accent/60 min-w-0 flex-1 sm:flex-none sm:max-w-[280px]"
             />
-            <div className="flex-1" />
+            <div className="hidden sm:block flex-1" />
 
             {/* Save indicator */}
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-ink-muted">
+            <div className="hidden md:flex items-center gap-1.5 text-xs text-ink-muted">
               <span>{wordCount(activeScene.scene.content).toLocaleString("es")} palabras</span>
               <span className="opacity-40">·</span>
               {saveState === "saving" ? (
                 <span className="inline-flex items-center gap-1 text-mint"><Loader2 className="h-3 w-3 animate-spin" /> Sincronizando…</span>
               ) : saveState === "synced" ? (
-                <span className="inline-flex items-center gap-1 text-mint"><Check className="h-3 w-3" /> Guardado automáticamente</span>
+                <span className="inline-flex items-center gap-1 text-mint"><Check className="h-3 w-3" /> Guardado</span>
               ) : (
-                <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-mint" /> Todos los cambios guardados</span>
+                <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-mint" /> Guardado</span>
               )}
             </div>
 
-            {/* Undo / Redo */}
-            <UndoRedo
-              sceneId={activeScene.scene.id}
-              current={activeScene.scene.content}
-              onApply={(html) => applyContent(html, { skipHistory: true })}
-            />
-
-            {/* Version history */}
-            <button
-              onClick={() => setHistoryOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition"
-              title="Historial de versiones"
-            >
-              <History className="h-3.5 w-3.5" /> Historial
-            </button>
-
-
-            {/* Immersion picker */}
-            <div className="relative">
-              <button
-                onClick={() => setImmersionMenu((v) => !v)}
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all ${
-                  immersive ? "border-emerald text-mint bg-accent glow-border" : "border-hairline bg-paper-elevated text-ink hover:border-emerald"
-                }`}
-              >
-                <Eye className="h-3.5 w-3.5" /> Inmersión
+            {/* Desktop full toolbar */}
+            <div className="hidden md:flex items-center gap-2">
+              <UndoRedo
+                sceneId={activeScene.scene.id}
+                current={activeScene.scene.content}
+                onApply={(html) => applyContent(html, { skipHistory: true })}
+              />
+              <button onClick={() => setHistoryOpen(true)} className={toolBtnCls} title="Historial">
+                <History className="h-3.5 w-3.5" /> Historial
               </button>
-              {immersionMenu && (
-                <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl glass-strong border border-hairline p-1.5 z-30 animate-fade-up">
-                  {IMMERSION_OPTIONS.map((o) => (
-                    <button
-                      key={o.id} onClick={() => setImmersion(o.id)}
-                      className={`w-full text-left text-xs rounded-lg px-2.5 py-2 hover:bg-accent transition ${
-                        user.immersionTheme === o.id ? "bg-accent text-mint" : "text-ink"
-                      }`}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+
+              {/* Immersion */}
+              <div className="relative">
+                <button
+                  onClick={() => setImmersionMenu((v) => !v)}
+                  className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all ${
+                    immersive ? "border-emerald text-mint bg-accent glow-border" : "border-hairline bg-paper-elevated text-ink hover:border-emerald"
+                  }`}
+                >
+                  <Eye className="h-3.5 w-3.5" /> Inmersión
+                </button>
+                {immersionMenu && (
+                  <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl glass-strong border border-hairline p-1.5 z-30 animate-fade-up">
+                    {IMMERSION_OPTIONS.map((o) => (
+                      <button
+                        key={o.id} onClick={() => setImmersion(o.id)}
+                        className={`w-full text-left text-xs rounded-lg px-2.5 py-2 hover:bg-accent transition ${
+                          user.immersionTheme === o.id ? "bg-accent text-mint" : "text-ink"
+                        }`}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button onClick={() => setShowHealth((v) => !v)}
+                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs transition-all ${
+                  showHealth ? "bg-accent text-mint border border-emerald" : "border border-hairline bg-paper-elevated text-ink hover:border-emerald"
+                }`}>
+                <Activity className="h-3.5 w-3.5" /> Pulso
+              </button>
+
+              <button onClick={() => setLabOpen(true)} className={toolBtnCls} title="Laboratorio narrativo">
+                <FlaskConical className="h-3.5 w-3.5" /> Lab
+              </button>
+
+              <ExportMenu />
+
+              <button onClick={() => setSettingsOpen(true)} className={toolBtnCls} title="Ajustes">
+                <SettingsIcon className="h-3.5 w-3.5" />
+              </button>
+
+              <button onClick={() => setFocus(true)} className={toolBtnCls}>
+                <Maximize2 className="h-3.5 w-3.5" /> Concentración
+              </button>
+
+              <button onClick={() => setShowAssistant((v) => !v)}
+                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs transition-all ${
+                  showAssistant ? "bg-assistant-surface text-mint border border-emerald" : "border border-hairline bg-paper-elevated text-ink hover:border-emerald"
+                }`}>
+                <Sparkles className="h-3.5 w-3.5" /> Lumi
+              </button>
             </div>
 
-            <button
-              onClick={() => setShowHealth((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs transition-all ${
-                showHealth ? "bg-accent text-mint border border-emerald" : "border border-hairline bg-paper-elevated text-ink hover:border-emerald"
-              }`}
-            >
-              <Activity className="h-3.5 w-3.5" /> Pulso
-            </button>
+            {/* Mobile compact toolbar */}
+            <div className="md:hidden flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setShowAssistant(true)}
+                className="rounded-md p-1.5 text-mint hover:bg-accent"
+                aria-label="Lumi"
+              >
+                <Sparkles className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setOverflowMenu((v) => !v)}
+                className="rounded-md p-1.5 text-ink hover:bg-accent relative"
+                aria-label="Más opciones"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
-            <ExportMenu />
+        {/* Mobile overflow menu */}
+        {overflowMenu && !focus && (
+          <div className="md:hidden fixed inset-0 z-40 animate-fade-up" onClick={() => setOverflowMenu(false)}>
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="absolute top-14 right-3 left-3 rounded-2xl glass-strong border border-hairline p-2 grid grid-cols-3 gap-1.5" onClick={(e) => e.stopPropagation()}>
+              <MobileToolBtn icon={<Eye className="h-4 w-4" />} label="Inmersión" onClick={() => { setOverflowMenu(false); setImmersionMenu(true); }} />
+              <MobileToolBtn icon={<Activity className="h-4 w-4" />} label="Pulso" onClick={() => { setShowHealth((v) => !v); setOverflowMenu(false); }} />
+              <MobileToolBtn icon={<FlaskConical className="h-4 w-4" />} label="Lab" onClick={() => { setLabOpen(true); setOverflowMenu(false); }} />
+              <MobileToolBtn icon={<History className="h-4 w-4" />} label="Historial" onClick={() => { setHistoryOpen(true); setOverflowMenu(false); }} />
+              <MobileToolBtn icon={<SettingsIcon className="h-4 w-4" />} label="Ajustes" onClick={() => { setSettingsOpen(true); setOverflowMenu(false); }} />
+              <MobileToolBtn icon={<Maximize2 className="h-4 w-4" />} label="Foco" onClick={() => { setFocus(true); setOverflowMenu(false); }} />
+            </div>
 
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald"
-              title="Ajustes de la historia"
-            >
-              <SettingsIcon className="h-3.5 w-3.5" />
-            </button>
-
-
-            <button
-              onClick={() => setFocus(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald"
-            >
-              <Maximize2 className="h-3.5 w-3.5" /> Concentración
-            </button>
-            <button
-              onClick={() => setShowAssistant((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs transition-all ${
-                showAssistant
-                  ? "bg-assistant-surface text-mint border border-emerald"
-                  : "border border-hairline bg-paper-elevated text-ink hover:border-emerald"
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5" /> Lumi
-            </button>
+            {/* Mobile immersion sheet */}
+            {immersionMenu && (
+              <div className="absolute inset-x-3 bottom-3 rounded-2xl glass-strong border border-hairline p-2 z-50" onClick={(e) => e.stopPropagation()}>
+                {IMMERSION_OPTIONS.map((o) => (
+                  <button key={o.id} onClick={() => { setImmersion(o.id); setOverflowMenu(false); }}
+                    className={`w-full text-left text-sm rounded-lg px-3 py-2.5 hover:bg-accent transition ${
+                      user.immersionTheme === o.id ? "bg-accent text-mint" : "text-ink"
+                    }`}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -306,16 +358,16 @@ function Workspace() {
 
         {/* Manuscript */}
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-6 md:px-10 py-10 md:py-16">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16">
             {showHealth && !focus && (
-              <div className="mb-8 animate-fade-up">
+              <div className="mb-6 sm:mb-8 animate-fade-up">
                 <StoryHealth story={story} />
               </div>
             )}
             <input
               value={activeScene.scene.title}
               onChange={(e) => updateSceneTitle(e.target.value)}
-              className="w-full bg-transparent font-serif text-3xl md:text-4xl text-ink outline-none mb-8 placeholder:text-ink-muted/60"
+              className="w-full bg-transparent font-serif text-2xl sm:text-3xl md:text-4xl text-ink outline-none mb-5 sm:mb-8 placeholder:text-ink-muted/60"
               placeholder="Título de la escena"
             />
             <Editor
@@ -328,10 +380,27 @@ function Workspace() {
         </div>
       </div>
 
-      {/* Assistant */}
+      {/* Assistant — desktop pinned */}
       {showAssistant && !focus && (
-        <div className="w-[380px] shrink-0 hidden lg:block relative z-10">
+        <div className="w-[380px] shrink-0 hidden xl:block relative z-10">
           <AssistantPanel story={story} onInsertDraft={insertDraft} />
+        </div>
+      )}
+
+      {/* Assistant — mobile/tablet sheet */}
+      {showAssistant && !focus && (
+        <div className="xl:hidden fixed inset-0 z-50 flex justify-end animate-fade-up">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAssistant(false)} />
+          <div className="relative w-full sm:w-[420px] max-w-full h-[100dvh] safe-top safe-bottom">
+            <button
+              onClick={() => setShowAssistant(false)}
+              className="absolute top-3 right-3 z-10 rounded-md p-1.5 glass border border-hairline text-ink-muted hover:text-ink"
+              aria-label="Cerrar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <AssistantPanel story={story} onInsertDraft={insertDraft} />
+          </div>
         </div>
       )}
 
@@ -345,10 +414,21 @@ function Workspace() {
         currentContent={activeScene.scene.content}
         onRestore={(html) => applyContent(html)}
       />
-
+      <StoryLab story={story} open={labOpen} onClose={() => setLabOpen(false)} onInsertText={insertDraft} />
     </div>
+  );
+}
 
+const toolBtnCls =
+  "inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition";
 
+function MobileToolBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick}
+      className="flex flex-col items-center gap-1 rounded-xl border border-hairline bg-paper-elevated/70 px-2 py-3 text-[10px] uppercase tracking-widest text-ink hover:border-emerald hover:text-mint transition">
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }
 
