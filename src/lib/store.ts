@@ -107,7 +107,7 @@ function migrateUser(raw: unknown): User | null {
     plan,
     proactiveNudges: (u.proactiveNudges as boolean) ?? true,
     fontSize: (u.fontSize as number) ?? 19,
-    theme: (u.theme === "light" ? "light" : "dark") as "light" | "dark",
+    theme: (u.theme === "alba" || u.theme === "dia" ? u.theme : u.theme === "light" ? "dia" : "noche") as ThemeMode,
     xp: (u.xp as number) ?? 0,
     immersionTheme: (u.immersionTheme as ImmersionTheme) ?? "ninguno",
     specialist: (u.specialist as AiSpecialist) ?? "lumi",
@@ -303,9 +303,10 @@ export function useApplyTheme() {
   const user = useUser();
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("dark", "light");
-    if (user?.theme === "light") root.classList.add("light");
-    // dark is :root default — no extra class needed
+    root.classList.remove("dark", "light", "theme-noche", "theme-alba", "theme-dia");
+    const t = user?.theme ?? "noche";
+    root.classList.add(`theme-${t}`);
+    // "noche" = dark default (no extra var override); alba & dia override tokens.
   }, [user?.theme]);
 }
 
