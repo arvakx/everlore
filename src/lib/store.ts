@@ -110,6 +110,7 @@ function migrateUser(raw: unknown): User | null {
     xp: (u.xp as number) ?? 0,
     immersionTheme: (u.immersionTheme as ImmersionTheme) ?? "ninguno",
     specialist: (u.specialist as AiSpecialist) ?? "lumi",
+    agentOverrides: (u.agentOverrides as User["agentOverrides"]) ?? {},
   };
 }
 
