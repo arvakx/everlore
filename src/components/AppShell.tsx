@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="truncate text-[10px] text-ink-muted">{user.email || "Escritor de Everlore"}</div>
           </div>
           <button
-            onClick={() => { setUser(null); router.navigate({ to: "/login" }); }}
+            onClick={async () => { await signOut(); router.navigate({ to: "/login" }); }}
             title="Cerrar sesión"
             className="rounded-md p-1.5 text-ink-muted hover:bg-accent hover:text-ink"
           >
