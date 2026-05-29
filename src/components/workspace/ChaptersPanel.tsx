@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, ChevronDown, Plus, BookText } from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, Map } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Story } from "@/lib/store";
 import { newId, updateStory, wordCount } from "@/lib/store";
@@ -15,68 +15,53 @@ export function ChaptersPanel({ story, activeSceneId, onSelectScene }: Props) {
     Object.fromEntries(story.chapters.map((c) => [c.id, true]))
   );
 
-  function toggle(id: string) {
-    setOpenChapters((p) => ({ ...p, [id]: !p[id] }));
-  }
+  function toggle(id: string) { setOpenChapters((p) => ({ ...p, [id]: !p[id] })); }
 
   function addChapter() {
     updateStory(story.id, (s) => ({
       ...s,
       chapters: [
         ...s.chapters,
-        {
-          id: newId(),
-          title: `Capítulo ${s.chapters.length + 1}`,
-          scenes: [{ id: newId(), title: "Escena nueva", content: "" }],
-        },
+        { id: newId(), title: `Capítulo ${s.chapters.length + 1}`, scenes: [{ id: newId(), title: "Escena nueva", content: "" }] },
       ],
     }));
   }
-
   function addScene(chapterId: string) {
     updateStory(story.id, (s) => ({
       ...s,
       chapters: s.chapters.map((c) =>
-        c.id === chapterId
-          ? { ...c, scenes: [...c.scenes, { id: newId(), title: "Escena nueva", content: "" }] }
-          : c
+        c.id === chapterId ? { ...c, scenes: [...c.scenes, { id: newId(), title: "Escena nueva", content: "" }] } : c
       ),
     }));
   }
-
   function renameChapter(chapterId: string, title: string) {
-    updateStory(story.id, (s) => ({
-      ...s,
-      chapters: s.chapters.map((c) => (c.id === chapterId ? { ...c, title } : c)),
-    }));
+    updateStory(story.id, (s) => ({ ...s, chapters: s.chapters.map((c) => c.id === chapterId ? { ...c, title } : c) }));
   }
-
   function renameScene(chapterId: string, sceneId: string, title: string) {
     updateStory(story.id, (s) => ({
       ...s,
       chapters: s.chapters.map((c) =>
-        c.id === chapterId
-          ? { ...c, scenes: c.scenes.map((sc) => (sc.id === sceneId ? { ...sc, title } : sc)) }
-          : c
+        c.id === chapterId ? { ...c, scenes: c.scenes.map((sc) => sc.id === sceneId ? { ...sc, title } : sc) } : c
       ),
     }));
   }
 
   return (
-    <div className="flex h-full flex-col bg-paper border-r border-hairline">
+    <div className="flex h-full flex-col glass border-r border-hairline">
       <div className="px-4 py-4 border-b border-hairline">
         <Link
           to="/historia/$storyId/biblia"
           params={{ storyId: story.id }}
-          className="flex items-center gap-2 text-sm text-assistant-accent hover:text-ink transition-colors"
+          className="flex items-center gap-2 text-sm text-mint hover:text-neon transition-colors"
         >
-          <BookText className="h-4 w-4" />
-          Biblia de la historia
+          <Map className="h-4 w-4" />
+          Sala de Guerra
         </Link>
+        <div className="text-[10px] text-ink-muted mt-1 ml-6">Biblia · mundo · personajes</div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-2 py-3">
-        <div className="px-2 mb-2 text-xs uppercase tracking-wider text-ink-muted">Capítulos</div>
+        <div className="px-2 mb-2 text-[10px] uppercase tracking-[0.2em] text-ink-muted">Capítulos</div>
 
         {story.chapters.map((ch) => {
           const open = openChapters[ch.id];
@@ -84,10 +69,7 @@ export function ChaptersPanel({ story, activeSceneId, onSelectScene }: Props) {
           return (
             <div key={ch.id} className="mb-1">
               <div className="flex items-center group">
-                <button
-                  onClick={() => toggle(ch.id)}
-                  className="p-1 text-ink-muted hover:text-ink"
-                >
+                <button onClick={() => toggle(ch.id)} className="p-1 text-ink-muted hover:text-mint">
                   {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                 </button>
                 <input
@@ -105,8 +87,10 @@ export function ChaptersPanel({ story, activeSceneId, onSelectScene }: Props) {
                     return (
                       <div
                         key={sc.id}
-                        className={`flex items-center rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors ${
-                          active ? "bg-accent text-ink" : "text-ink-muted hover:bg-accent/50 hover:text-ink"
+                        className={`flex items-center rounded-lg px-2 py-1.5 text-sm cursor-pointer transition-all ${
+                          active
+                            ? "bg-accent text-ink border-l-2 border-emerald shadow-glow-sm"
+                            : "text-ink-muted hover:bg-accent/40 hover:text-ink border-l-2 border-transparent"
                         }`}
                         onClick={() => onSelectScene(sc.id)}
                       >
@@ -122,7 +106,7 @@ export function ChaptersPanel({ story, activeSceneId, onSelectScene }: Props) {
                   })}
                   <button
                     onClick={() => addScene(ch.id)}
-                    className="flex items-center gap-1 ml-2 px-2 py-1 text-xs text-ink-muted hover:text-ember"
+                    className="flex items-center gap-1 ml-2 px-2 py-1 text-xs text-ink-muted hover:text-mint"
                   >
                     <Plus className="h-3 w-3" /> Escena
                   </button>
@@ -134,7 +118,7 @@ export function ChaptersPanel({ story, activeSceneId, onSelectScene }: Props) {
 
         <button
           onClick={addChapter}
-          className="mt-3 flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-ink-muted hover:bg-accent/50 hover:text-ember"
+          className="mt-3 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-muted hover:bg-accent/40 hover:text-mint transition-colors"
         >
           <Plus className="h-4 w-4" /> Capítulo
         </button>
