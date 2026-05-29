@@ -46,7 +46,7 @@ export function AuthCard({ mode }: Props) {
           </div>
           <div className="font-serif text-5xl tracking-tight gradient-text text-glow">Everlore</div>
           <p className="mt-3 text-sm text-ink-muted italic">
-            Tu santuario creativo. Lumi te está esperando.
+            TU SANTUARIO CREATIVO. LUMI TE ESTÁ ESPERANDO.
           </p>
         </div>
 
