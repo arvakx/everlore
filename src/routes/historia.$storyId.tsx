@@ -240,8 +240,9 @@ function Workspace() {
                 current={activeScene.scene.content}
                 onApply={(html) => applyContent(html, { skipHistory: true })}
               />
-              <button onClick={() => setHistoryOpen(true)} className={toolBtnCls} title="Historial">
+              <button disabled className={`${toolBtnCls} opacity-50 cursor-not-allowed`} title="Próximamente">
                 <History className="h-3.5 w-3.5" /> Historial
+                <span className="ml-1 text-[9px] uppercase tracking-widest text-mint/70">Pronto</span>
               </button>
 
               {/* Immersion */}
@@ -270,11 +271,11 @@ function Workspace() {
                 )}
               </div>
 
-              <button onClick={() => setShowHealth((v) => !v)}
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs transition-all ${
-                  showHealth ? "bg-accent text-mint border border-emerald" : "border border-hairline bg-paper-elevated text-ink hover:border-emerald"
-                }`}>
+              <button disabled
+                className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs border border-hairline bg-paper-elevated text-ink opacity-50 cursor-not-allowed"
+                title="Próximamente">
                 <Activity className="h-3.5 w-3.5" /> Pulso
+                <span className="ml-1 text-[9px] uppercase tracking-widest text-mint/70">Pronto</span>
               </button>
 
               <button onClick={() => setLabOpen(true)} className={toolBtnCls} title="Laboratorio narrativo">
@@ -335,9 +336,9 @@ function Workspace() {
             <div className="absolute inset-0 bg-black/50" />
             <div className="absolute top-16 right-3 left-3 rounded-2xl glass-strong border border-hairline p-2 grid grid-cols-3 gap-1.5 safe-top" onClick={(e) => e.stopPropagation()}>
               <MobileToolBtn icon={<Eye className="h-4 w-4" />} label="Inmersión" onClick={() => { setOverflowMenu(false); setImmersionMenu(true); }} />
-              <MobileToolBtn icon={<Activity className="h-4 w-4" />} label="Pulso" onClick={() => { setShowHealth((v) => !v); setOverflowMenu(false); }} />
+              <MobileToolBtn disabled icon={<Activity className="h-4 w-4" />} label="Pulso" onClick={() => {}} />
               <MobileToolBtn icon={<FlaskConical className="h-4 w-4" />} label="Lab" onClick={() => { setLabOpen(true); setOverflowMenu(false); }} />
-              <MobileToolBtn icon={<History className="h-4 w-4" />} label="Historial" onClick={() => { setHistoryOpen(true); setOverflowMenu(false); }} />
+              <MobileToolBtn disabled icon={<History className="h-4 w-4" />} label="Historial" onClick={() => {}} />
               <MobileToolBtn icon={<SettingsIcon className="h-4 w-4" />} label="Ajustes" onClick={() => { setSettingsOpen(true); setOverflowMenu(false); }} />
               <MobileToolBtn icon={<Maximize2 className="h-4 w-4" />} label="Foco" onClick={() => { setFocus(true); setOverflowMenu(false); }} />
             </div>
@@ -434,12 +435,15 @@ function Workspace() {
 const toolBtnCls =
   "inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition";
 
-function MobileToolBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+function MobileToolBtn({ icon, label, onClick, disabled }: { icon: React.ReactNode; label: string; onClick: () => void; disabled?: boolean }) {
   return (
-    <button onClick={onClick}
-      className="flex flex-col items-center gap-1 rounded-xl border border-hairline bg-paper-elevated/70 px-2 py-3 text-[10px] uppercase tracking-widest text-ink hover:border-emerald hover:text-mint transition">
+    <button onClick={disabled ? undefined : onClick} disabled={disabled} title={disabled ? "Próximamente" : undefined}
+      className={`relative flex flex-col items-center gap-1 rounded-xl border border-hairline bg-paper-elevated/70 px-2 py-3 text-[10px] uppercase tracking-widest text-ink transition ${
+        disabled ? "opacity-50 cursor-not-allowed" : "hover:border-emerald hover:text-mint"
+      }`}>
       {icon}
       <span>{label}</span>
+      {disabled && <span className="absolute -top-1.5 right-1 text-[8px] tracking-widest text-mint/80 bg-paper-elevated border border-hairline rounded px-1">Pronto</span>}
     </button>
   );
 }

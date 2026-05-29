@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   X, FlaskConical, Wand2, GitBranch, Brain, Film, Scissors, Trophy, Users,
-  Blocks, Globe, BookOpen, Feather, Bookmark, Lightbulb, Palette, PenLine, Sparkles,
+  Blocks, Globe, BookOpen, Feather, Bookmark, Lightbulb, Palette, PenLine, Sparkles, Lock,
 } from "lucide-react";
 import type { Story } from "@/lib/store";
 
@@ -18,7 +18,14 @@ type FeatureId =
   | "rpg" | "reader" | "blocks" | "universe" | "publish"
   | "anti" | "canon" | "daily" | "style" | "coauthor";
 
+const AVAILABLE: FeatureId[] = ["blocks", "publish", "anti", "canon"];
+const isAvailable = (id: FeatureId) => AVAILABLE.includes(id);
+
 const FEATURES: { id: FeatureId; label: string; icon: typeof Wand2; tagline: string }[] = [
+  { id: "blocks",   label: "Bloques narrativos",      icon: Blocks,       tagline: "Escenas, diálogos, flashbacks" },
+  { id: "publish",  label: "Publicación profesional", icon: BookOpen,     tagline: "Portada, sinopsis, maquetado" },
+  { id: "anti",     label: "Anti-perfeccionismo",     icon: Feather,      tagline: "Modo borrador libre" },
+  { id: "canon",    label: "Eventos canon",           icon: Bookmark,     tagline: "Línea de tiempo de momentos clave" },
   { id: "chapter",  label: "Capítulos vivos",         icon: Wand2,        tagline: "Atmósfera adaptativa por tono" },
   { id: "decisions",label: "Decisiones narrativas",   icon: GitBranch,    tagline: "Bifurcaciones estilo RPG" },
   { id: "memory",   label: "Memoria emocional",       icon: Brain,        tagline: "Perfil creativo del escritor" },
@@ -26,18 +33,14 @@ const FEATURES: { id: FeatureId; label: string; icon: typeof Wand2; tagline: str
   { id: "dual",     label: "Editor dual",             icon: Scissors,     tagline: "Duro o creativo, tú eliges" },
   { id: "rpg",      label: "Progresión RPG",          icon: Trophy,       tagline: "XP, niveles, logros" },
   { id: "reader",   label: "Simulador de lector",     icon: Users,        tagline: "Casual, fan, crítico, editor" },
-  { id: "blocks",   label: "Bloques narrativos",      icon: Blocks,       tagline: "Escenas, diálogos, flashbacks" },
   { id: "universe", label: "Universo colaborativo",   icon: Globe,        tagline: "Comparte mundos y lore" },
-  { id: "publish",  label: "Publicación profesional", icon: BookOpen,     tagline: "Portada, sinopsis, maquetado" },
-  { id: "anti",     label: "Anti-perfeccionismo",     icon: Feather,      tagline: "Modo borrador libre" },
-  { id: "canon",    label: "Eventos canon",           icon: Bookmark,     tagline: "Línea de tiempo de momentos clave" },
   { id: "daily",    label: "Inspiración diaria",      icon: Lightbulb,    tagline: "Un prompt al día" },
   { id: "style",    label: "Transformación de estilo", icon: Palette,     tagline: "Épico, poético, oscuro…" },
   { id: "coauthor", label: "Co-autor en vivo",        icon: PenLine,      tagline: "Sugerencias línea a línea" },
 ];
 
 export function StoryLab({ story, open, onClose, onInsertText }: Props) {
-  const [active, setActive] = useState<FeatureId>("chapter");
+  const [active, setActive] = useState<FeatureId>("blocks");
   if (!open) return null;
 
   return (
@@ -66,16 +69,19 @@ export function StoryLab({ story, open, onClose, onInsertText }: Props) {
               {FEATURES.map((f) => {
                 const sel = f.id === active;
                 const Icon = f.icon;
+                const avail = isAvailable(f.id);
                 return (
                   <button
                     key={f.id}
                     onClick={() => setActive(f.id)}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap md:whitespace-normal text-left ${
+                    title={avail ? undefined : "Próximamente"}
+                    className={`group relative flex items-center gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap md:whitespace-normal text-left ${
                       sel ? "bg-accent text-mint border border-emerald" : "text-ink-muted hover:text-ink hover:bg-accent/40 border border-transparent"
-                    }`}
+                    } ${avail ? "" : "opacity-60"}`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     <span className="truncate">{f.label}</span>
+                    {!avail && <Lock className="h-3 w-3 ml-auto text-mint/70 shrink-0" />}
                   </button>
                 );
               })}
@@ -95,34 +101,43 @@ export function StoryLab({ story, open, onClose, onInsertText }: Props) {
 function FeatureDetail({ id, story, onInsertText, onClose }: { id: FeatureId; story: Story; onInsertText?: (t: string) => void; onClose: () => void }) {
   const f = FEATURES.find((x) => x.id === id)!;
   const Icon = f.icon;
+  const avail = isAvailable(id);
 
   return (
     <div className="space-y-5 max-w-2xl">
       <div className="flex items-start gap-3">
-        <div className="rounded-xl gradient-emerald p-2.5 text-primary-foreground glow-ring">
+        <div className={`rounded-xl p-2.5 text-primary-foreground ${avail ? "gradient-emerald glow-ring" : "bg-paper-elevated border border-hairline text-ink-muted"}`}>
           <Icon className="h-5 w-5" />
         </div>
-        <div>
-          <h3 className="font-serif text-2xl text-ink">{f.label}</h3>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-serif text-2xl text-ink">{f.label}</h3>
+            {!avail && (
+              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-mint border border-emerald/40 bg-accent/40 rounded-full px-2 py-0.5">
+                <Lock className="h-3 w-3" /> Próximamente
+              </span>
+            )}
+          </div>
           <p className="text-sm text-mint italic">{f.tagline}</p>
         </div>
       </div>
 
-      {id === "chapter" && <ChapterFeature story={story} />}
-      {id === "decisions" && <DecisionsFeature story={story} />}
-      {id === "memory" && <MemoryFeature story={story} />}
-      {id === "scene" && <SceneFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "dual" && <DualEditorFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "rpg" && <RpgFeature />}
-      {id === "reader" && <ReaderFeature />}
-      {id === "blocks" && <BlocksFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "universe" && <UniverseFeature />}
-      {id === "publish" && <PublishFeature />}
-      {id === "anti" && <AntiFeature />}
-      {id === "canon" && <CanonFeature story={story} />}
-      {id === "daily" && <DailyFeature />}
-      {id === "style" && <StyleFeature onInsertText={onInsertText} onClose={onClose} />}
-      {id === "coauthor" && <CoauthorFeature onInsertText={onInsertText} onClose={onClose} />}
+      {!avail ? (
+        <div className="rounded-2xl border border-hairline bg-paper-elevated/60 p-8 text-center glow-border">
+          <Lock className="h-8 w-8 text-mint mx-auto mb-3" />
+          <h4 className="font-serif text-xl text-ink mb-2">Próximamente en Everlore</h4>
+          <p className="text-sm text-ink-muted max-w-md mx-auto">
+            Estamos forjando esta función con el cuidado que tu historia merece. Te avisaremos en cuanto esté lista para ti.
+          </p>
+        </div>
+      ) : (
+        <>
+          {id === "blocks" && <BlocksFeature onInsertText={onInsertText} onClose={onClose} />}
+          {id === "publish" && <PublishFeature />}
+          {id === "anti" && <AntiFeature />}
+          {id === "canon" && <CanonFeature story={story} />}
+        </>
+      )}
     </div>
   );
 }
