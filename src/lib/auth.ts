@@ -56,17 +56,19 @@ export function initAuth() {
 export async function persistUserPatch(patch: Partial<User>) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
-  const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (patch.name !== undefined) row.name = patch.name;
-  if (patch.email !== undefined) row.email = patch.email;
-  if (patch.plan !== undefined) row.plan = patch.plan;
-  if (patch.proactiveNudges !== undefined) row.proactive_nudges = patch.proactiveNudges;
-  if (patch.fontSize !== undefined) row.font_size = patch.fontSize;
-  if (patch.theme !== undefined) row.theme = patch.theme;
-  if (patch.xp !== undefined) row.xp = patch.xp;
-  if (patch.immersionTheme !== undefined) row.immersion_theme = patch.immersionTheme;
-  if (patch.specialist !== undefined) row.specialist = patch.specialist;
-  if (patch.agentOverrides !== undefined) row.agent_overrides = patch.agentOverrides;
+  const row = {
+    updated_at: new Date().toISOString(),
+    ...(patch.name !== undefined ? { name: patch.name } : {}),
+    ...(patch.email !== undefined ? { email: patch.email } : {}),
+    ...(patch.plan !== undefined ? { plan: patch.plan } : {}),
+    ...(patch.proactiveNudges !== undefined ? { proactive_nudges: patch.proactiveNudges } : {}),
+    ...(patch.fontSize !== undefined ? { font_size: patch.fontSize } : {}),
+    ...(patch.theme !== undefined ? { theme: patch.theme } : {}),
+    ...(patch.xp !== undefined ? { xp: patch.xp } : {}),
+    ...(patch.immersionTheme !== undefined ? { immersion_theme: patch.immersionTheme } : {}),
+    ...(patch.specialist !== undefined ? { specialist: patch.specialist } : {}),
+    ...(patch.agentOverrides !== undefined ? { agent_overrides: patch.agentOverrides } : {}),
+  };
   await supabase.from("profiles").update(row).eq("id", session.user.id);
 }
 
