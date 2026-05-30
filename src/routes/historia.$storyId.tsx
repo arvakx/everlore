@@ -5,7 +5,7 @@ import {
   History, Check, Loader2, ShieldCheck, BookOpen, Menu, FlaskConical, MoreHorizontal, X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, type ImmersionTheme } from "@/lib/store";
+import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, upsertStoryLocal, type ImmersionTheme } from "@/lib/store";
 import { ChaptersPanel } from "@/components/workspace/ChaptersPanel";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
 import { Editor } from "@/components/workspace/Editor";
@@ -61,18 +61,29 @@ function Workspace() {
   const lastRecoveryToastRef = useRef<number>(0);
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
-  // Grace period: don't redirect home immediately — local store may still be syncing
-  // after just creating the story (DB insert → setStoriesLocal → navigate race).
-  const [graceExpired, setGraceExpired] = useState(false);
+  const [recoveryDone, setRecoveryDone] = useState(false);
   useEffect(() => {
-    setGraceExpired(false);
-    const t = setTimeout(() => setGraceExpired(true), 2500);
-    return () => clearTimeout(t);
-  }, [storyId]);
+    let cancelled = false;
+    setRecoveryDone(false);
+    if (story) {
+      setRecoveryDone(true);
+      return () => { cancelled = true; };
+    }
+    void import("@/lib/stories-sync")
+      .then((m) => m.pullStoryById(storyId))
+      .then((freshStory) => {
+        if (cancelled) return;
+        if (freshStory) upsertStoryLocal(freshStory);
+      })
+      .finally(() => {
+        if (!cancelled) setRecoveryDone(true);
+      });
+    return () => { cancelled = true; };
+  }, [storyId, story?.id]);
   useEffect(() => {
-    if (story || !graceExpired) return;
+    if (story || !recoveryDone) return;
     router.navigate({ to: "/" });
-  }, [story, graceExpired, router]);
+  }, [story, recoveryDone, router]);
 
   const activeScene = useMemo(() => {
     if (!story) return null;
