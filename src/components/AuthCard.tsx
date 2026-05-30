@@ -28,23 +28,28 @@ export function AuthCard({ mode }: Props) {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!email || !password || (isSignup && !name)) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password || (isSignup && !name.trim())) {
       setError("Completa todos los campos.");
       return;
     }
     setLoading(true);
     try {
+      // Clear any lingering local session before authenticating fresh.
+      try { await supabase.auth.signOut({ scope: "local" }); } catch { /* ignore */ }
       if (isSignup) {
-        await signUpWithEmail(name, email, password);
+        await signUpWithEmail(name.trim(), cleanEmail, password);
       } else {
-        await signInWithEmail(email, password);
+        await signInWithEmail(cleanEmail, password);
       }
       await hydrateUserFromSession();
       router.navigate({ to: "/" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "No se pudo completar la acción.";
-      if (/Invalid login/i.test(msg)) setError("Correo o contraseña incorrectos.");
-      else if (/already registered/i.test(msg)) setError("Este correo ya está registrado. Inicia sesión.");
+      console.error("[auth]", msg);
+      if (/Invalid login|invalid_credentials/i.test(msg)) setError("Correo o contraseña incorrectos.");
+      else if (/Email not confirmed/i.test(msg)) setError("Confirma tu correo antes de iniciar sesión.");
+      else if (/already registered|User already/i.test(msg)) setError("Este correo ya está registrado. Inicia sesión.");
       else if (/Password should be at least/i.test(msg)) setError("La contraseña debe tener al menos 6 caracteres.");
       else setError(msg);
     } finally {

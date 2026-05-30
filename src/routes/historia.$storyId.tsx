@@ -61,10 +61,18 @@ function Workspace() {
   const lastRecoveryToastRef = useRef<number>(0);
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
+  // Grace period: don't redirect home immediately — local store may still be syncing
+  // after just creating the story (DB insert → setStoriesLocal → navigate race).
+  const [graceExpired, setGraceExpired] = useState(false);
   useEffect(() => {
-    if (story === undefined) return;
-    if (!story) router.navigate({ to: "/" });
-  }, [story, router]);
+    setGraceExpired(false);
+    const t = setTimeout(() => setGraceExpired(true), 2500);
+    return () => clearTimeout(t);
+  }, [storyId]);
+  useEffect(() => {
+    if (story || !graceExpired) return;
+    router.navigate({ to: "/" });
+  }, [story, graceExpired, router]);
 
   const activeScene = useMemo(() => {
     if (!story) return null;
