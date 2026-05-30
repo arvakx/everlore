@@ -80,11 +80,6 @@ function Workspace() {
       });
     return () => { cancelled = true; };
   }, [storyId, story]);
-  useEffect(() => {
-    if (story || !recoveryDone) return;
-    router.navigate({ to: "/" });
-  }, [story, recoveryDone, router]);
-
   const activeScene = useMemo(() => {
     if (!story) return null;
     for (const ch of story.chapters) {
@@ -104,7 +99,9 @@ function Workspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeScene?.scene.id]);
 
-  if (!story || !activeScene || !user) return null;
+  if (!user) return null;
+  if (!story) return <StoryRecoveryState ready={recoveryDone} onHome={() => router.navigate({ to: "/" })} />;
+  if (!activeScene) return <StoryRecoveryState ready onHome={() => router.navigate({ to: "/" })} />;
 
   const immersion = IMMERSION_OPTIONS.find((o) => o.id === user.immersionTheme) ?? IMMERSION_OPTIONS[0];
 
