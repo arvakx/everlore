@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon,
   History, Check, Loader2, ShieldCheck, BookOpen, Menu, FlaskConical, MoreHorizontal, X,
@@ -189,7 +189,7 @@ function Workspace() {
   return (
     <div
       className={`relative flex h-[100dvh] w-full overflow-hidden aura-transition ${focus ? "focus-mode" : ""} ${immersive ? immersion.className : "bg-ambient"}`}
-      style={{ ["--story-aura" as any]: story.coverColor }}
+      style={{ "--story-aura": story.coverColor } as CSSProperties}
     >
       {immersive && <Particles count={30} />}
 
