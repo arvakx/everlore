@@ -79,7 +79,7 @@ function Workspace() {
         if (!cancelled) setRecoveryDone(true);
       });
     return () => { cancelled = true; };
-  }, [storyId, story?.id]);
+  }, [storyId, story]);
   useEffect(() => {
     if (story || !recoveryDone) return;
     router.navigate({ to: "/" });
