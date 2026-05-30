@@ -143,6 +143,14 @@ export function useUser() {
 export function getStories(): Story[] { return readJSON<Story[]>(KEYS.stories, []); }
 export function setStoriesLocal(s: Story[]) { writeJSON(KEYS.stories, s); }
 
+export function upsertStoryLocal(story: Story) {
+  const stories = getStories();
+  const idx = stories.findIndex((s) => s.id === story.id);
+  if (idx >= 0) stories[idx] = story;
+  else stories.unshift(story);
+  setStoriesLocal(stories);
+}
+
 export function useStories(): Story[] {
   const snap = useSyncExternalStore(
     subscribe,

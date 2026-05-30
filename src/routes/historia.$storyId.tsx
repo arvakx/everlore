@@ -1,11 +1,11 @@
 import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   ArrowLeft, Maximize2, Minimize2, Sparkles, Activity, Eye, Settings as SettingsIcon,
   History, Check, Loader2, ShieldCheck, BookOpen, Menu, FlaskConical, MoreHorizontal, X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, type ImmersionTheme } from "@/lib/store";
+import { useStory, updateStory, wordCount, useApplyTheme, useUser, updateUser, upsertStoryLocal, type ImmersionTheme } from "@/lib/store";
 import { ChaptersPanel } from "@/components/workspace/ChaptersPanel";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
 import { Editor } from "@/components/workspace/Editor";
@@ -61,19 +61,25 @@ function Workspace() {
   const lastRecoveryToastRef = useRef<number>(0);
 
   useEffect(() => { if (!user) router.navigate({ to: "/login" }); }, [user, router]);
-  // Grace period: don't redirect home immediately — local store may still be syncing
-  // after just creating the story (DB insert → setStoriesLocal → navigate race).
-  const [graceExpired, setGraceExpired] = useState(false);
+  const [recoveryDone, setRecoveryDone] = useState(false);
   useEffect(() => {
-    setGraceExpired(false);
-    const t = setTimeout(() => setGraceExpired(true), 2500);
-    return () => clearTimeout(t);
-  }, [storyId]);
-  useEffect(() => {
-    if (story || !graceExpired) return;
-    router.navigate({ to: "/" });
-  }, [story, graceExpired, router]);
-
+    let cancelled = false;
+    setRecoveryDone(false);
+    if (story) {
+      setRecoveryDone(true);
+      return () => { cancelled = true; };
+    }
+    void import("@/lib/stories-sync")
+      .then((m) => m.pullStoryById(storyId))
+      .then((freshStory) => {
+        if (cancelled) return;
+        if (freshStory) upsertStoryLocal(freshStory);
+      })
+      .finally(() => {
+        if (!cancelled) setRecoveryDone(true);
+      });
+    return () => { cancelled = true; };
+  }, [storyId, story]);
   const activeScene = useMemo(() => {
     if (!story) return null;
     for (const ch of story.chapters) {
@@ -93,7 +99,9 @@ function Workspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeScene?.scene.id]);
 
-  if (!story || !activeScene || !user) return null;
+  if (!user) return null;
+  if (!story) return <StoryRecoveryState ready={recoveryDone} onHome={() => router.navigate({ to: "/" })} />;
+  if (!activeScene) return <StoryRecoveryState ready onHome={() => router.navigate({ to: "/" })} />;
 
   const immersion = IMMERSION_OPTIONS.find((o) => o.id === user.immersionTheme) ?? IMMERSION_OPTIONS[0];
 
@@ -178,7 +186,7 @@ function Workspace() {
   return (
     <div
       className={`relative flex h-[100dvh] w-full overflow-hidden aura-transition ${focus ? "focus-mode" : ""} ${immersive ? immersion.className : "bg-ambient"}`}
-      style={{ ["--story-aura" as any]: story.coverColor }}
+      style={{ "--story-aura": story.coverColor } as CSSProperties}
     >
       {immersive && <Particles count={30} />}
 
@@ -442,6 +450,27 @@ function Workspace() {
 
 const toolBtnCls =
   "inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition";
+
+function StoryRecoveryState({ ready, onHome }: { ready: boolean; onHome: () => void }) {
+  return (
+    <div className="flex h-[100dvh] w-full items-center justify-center bg-ambient px-6">
+      <div className="max-w-sm text-center glass-strong rounded-3xl p-8 glow-border">
+        {ready ? <BookOpen className="mx-auto h-7 w-7 text-mint" /> : <Loader2 className="mx-auto h-7 w-7 animate-spin text-mint" />}
+        <h1 className="mt-4 font-serif text-2xl text-ink">
+          {ready ? "No encontré esta historia" : "Abriendo tu historia"}
+        </h1>
+        <p className="mt-2 text-sm text-ink-muted">
+          {ready ? "Puede que haya sido borrada o pertenezca a otra cuenta." : "Estoy recuperando tu biblioteca guardada."}
+        </p>
+        {ready && (
+          <button onClick={onHome} className="mt-6 rounded-xl gradient-emerald px-5 py-2.5 text-sm font-medium text-primary-foreground hover:shadow-glow">
+            Volver a biblioteca
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function MobileToolBtn({ icon, label, onClick, disabled }: { icon: React.ReactNode; label: string; onClick: () => void; disabled?: boolean }) {
   return (
