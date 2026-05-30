@@ -451,6 +451,27 @@ function Workspace() {
 const toolBtnCls =
   "inline-flex items-center gap-1.5 rounded-md border border-hairline bg-paper-elevated px-2.5 py-1.5 text-xs text-ink hover:border-emerald hover:text-mint transition";
 
+function StoryRecoveryState({ ready, onHome }: { ready: boolean; onHome: () => void }) {
+  return (
+    <div className="flex h-[100dvh] w-full items-center justify-center bg-ambient px-6">
+      <div className="max-w-sm text-center glass-strong rounded-3xl p-8 glow-border">
+        {ready ? <BookOpen className="mx-auto h-7 w-7 text-mint" /> : <Loader2 className="mx-auto h-7 w-7 animate-spin text-mint" />}
+        <h1 className="mt-4 font-serif text-2xl text-ink">
+          {ready ? "No encontré esta historia" : "Abriendo tu historia"}
+        </h1>
+        <p className="mt-2 text-sm text-ink-muted">
+          {ready ? "Puede que haya sido borrada o pertenezca a otra cuenta." : "Estoy recuperando tu biblioteca guardada."}
+        </p>
+        {ready && (
+          <button onClick={onHome} className="mt-6 rounded-xl gradient-emerald px-5 py-2.5 text-sm font-medium text-primary-foreground hover:shadow-glow">
+            Volver a biblioteca
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MobileToolBtn({ icon, label, onClick, disabled }: { icon: React.ReactNode; label: string; onClick: () => void; disabled?: boolean }) {
   return (
     <button onClick={disabled ? undefined : onClick} disabled={disabled} title={disabled ? "Próximamente" : undefined}
