@@ -53,6 +53,18 @@ export async function pullAllStories(): Promise<Story[] | null> {
   return (data as StoryRow[]).map(rowToStory);
 }
 
+export async function pullStoryById(id: string): Promise<Story | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return null;
+  const { data, error } = await supabase
+    .from("stories")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) { console.error("pullStoryById", error); return null; }
+  return data ? rowToStory(data as StoryRow) : null;
+}
+
 export async function pushCreateStory(story: Story): Promise<{ ok: true; story: Story } | { ok: false; error: string }> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return { ok: false, error: "Sin sesión" };
